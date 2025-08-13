@@ -5,7 +5,7 @@
   <title>Hoho3D · Herramientas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Tipografía & Material Icons (carga única, no dupliques dentro de módulos) -->
+  <!-- Tipografía & Material Icons (carga única) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,11 +25,10 @@
       padding:8px 12px; border-radius:10px; cursor:pointer; font-size:14px }
     .nav-btn.is-active{ border-color:var(--accent); box-shadow:0 0 0 2px #000 inset }
     main{ max-width:1280px; margin:0 auto; padding:16px; }
-    /* Accesibilidad visual para secciones ocultas con [hidden] (pero accesibles para lectores si aria-hidden) */
     [hidden]{ display:none !important; }
   </style>
 
-  <!-- Estilos propios (YA escopados por contenedor raíz) -->
+  <!-- Estilos propios (escopados por contenedor raíz) -->
   <link rel="stylesheet" href="./styles/color.css">
   <link rel="stylesheet" href="./styles/calc.css">
 </head>
@@ -43,15 +42,25 @@
   </header>
 
   <main>
-    <!-- ========== Color Finder (Pega aquí TODO el markup original) ========== -->
+    <!-- ========== Color Finder (Pega aquí TODO tu markup original) ========== -->
     <section id="color-app" role="tabpanel" aria-labelledby="tab-color">
-      <!-- Pega tu index.html del Buscador por color COMPLETO dentro de este contenedor.
-           No cambies clases/IDs salvo los indicados en el informe.  -->
+      <!--
+        SUGERIDO: conserva estos IDs si tu JS los usa (ajusta si no existen en tu HTML original):
+        - #wheel, #vbar (canvas)
+        - #dot, #sel-rgb, #sel-hex
+        - #main-sw, #main-name, #main-brand, #main-type, #main-style, #main-temp, #main-strength, #main-hex, #main-link
+        - #preview-img, #ideas-btn, #ideas-box, #ideas-list
+        - #sugs, #q, #typeFilter
+        - #lightbox(#lb-img, #lb-close), #eyeModal(#eye-close)
+        - #sub1-(sw|name|desc|btn), #sub2-(sw|name|desc|btn)
+      -->
     </section>
 
-    <!-- ========== Calculadora de Costos (Pega aquí TODO el markup original) ========== -->
+    <!-- ========== Calculadora de Costos (Pega aquí TODO tu markup original) ========== -->
     <section id="calc-app" role="tabpanel" aria-labelledby="tab-calc" hidden>
-      <!-- Pega tu index.html de la Calculadora COMPLETO dentro de este contenedor. -->
+      <!-- Mantén tus clases/IDs. Asegúrate de que el botón de exportación tenga id="exportPDFBtn"
+           y las celdas de salida (ejemplo): #filamentoCell, #manoObraCell, #mlCell, #ivaCell, #totalFinalCell
+           y el progreso con id="progressBar" si usas barra de progreso. -->
     </section>
   </main>
 
@@ -60,10 +69,10 @@
     import { initColorTool, onShow as showColor, onHide as hideColor } from './color-tool.js';
     import { initCalcTool, onShow as showCalc, onHide as hideCalc } from './calc-tool.js';
 
-    const sections = /** @type {Record<string, HTMLElement>} */({
+    const sections = {
       '#color-app': document.querySelector('#color-app'),
       '#calc-app': document.querySelector('#calc-app')
-    });
+    };
 
     const state = { colorInit:false, calcInit:false, current:'#color-app' };
 
@@ -80,9 +89,8 @@
       if (prev && sections[prev]) {
         sections[prev].hidden = true;
         sections[prev].setAttribute('aria-hidden','true');
-        // Hooks de ocultar
-        if (prev === '#color-app') hideColor?.();
-        if (prev === '#calc-app') hideCalc?.();
+        if (prev === '#color-app' && typeof hideColor === 'function') hideColor();
+        if (prev === '#calc-app' && typeof hideCalc === 'function') hideCalc();
         sections[prev].dispatchEvent(new CustomEvent('spa:hide', {bubbles:false}));
       }
 
@@ -96,8 +104,8 @@
       if (target === '#calc-app' && !state.calcInit) { initCalcTool(el); state.calcInit = true; }
 
       // Hooks de mostrar
-      if (target === '#color-app') showColor?.();
-      if (target === '#calc-app') showCalc?.();
+      if (target === '#color-app' && typeof showColor === 'function') showColor();
+      if (target === '#calc-app' && typeof showCalc === 'function') showCalc();
 
       el.dispatchEvent(new CustomEvent('spa:show', {bubbles:false}));
       state.current = target;
@@ -125,7 +133,6 @@
     });
 
     // Vista inicial
-    // Si quieres abrir la calculadora por defecto, cambia a '#calc-app'
     show('#color-app');
   </script>
 </body>
