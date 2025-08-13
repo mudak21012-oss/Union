@@ -18,26 +18,17 @@ export function initCalcTool(container){
 
   const nextButtons = $$('.next-tab');
   const prevButtons = $$('.prev-tab');
-
   const exportBtn = $('#exportPDFBtn');
 
   function switchTab(key){
-    tabs.forEach(t=>{
-      const is = t.dataset.tab === key;
-      t.classList.toggle('active', is);
-    });
-    tabContents.forEach(c=>{
-      const id = c.id.replace('-tab','');
-      c.classList.toggle('active', id === key);
-    });
+    tabs.forEach(t=> t.classList.toggle('active', t.dataset.tab === key));
+    tabContents.forEach(c=> c.classList.toggle('active', c.id.replace('-tab','') === key));
     updateProgress(key);
   }
-
   function getCurrentTab(){
     const t = tabs.find(t=> t.classList.contains('active'));
     return t?.dataset.tab || (tabs[0]?.dataset.tab || 'basic');
   }
-
   function updateProgress(key){
     const order = tabs.map(t=>t.dataset.tab);
     const idx = Math.max(0, order.indexOf(key));
@@ -45,17 +36,10 @@ export function initCalcTool(container){
     if (progressBar) progressBar.style.width = pct+'%';
   }
 
-  function validateTab(key){
-    // Hook para tu validación. Devuelve true para continuar.
-    return true;
-  }
-
   const debounce = (fn, ms=160)=> (...args)=>{ clearTimeout(debTimer); debTimer=setTimeout(()=>fn(...args), ms); };
-
   function parseNum(sel, def=0){ const el=$(sel); return el? Number(el.value||def) : def; }
 
   function recalc(){
-    // Variables base (ajusta según tus IDs reales)
     const costoFilamentoKg = parseNum('#costoFilamento', 0);
     const gramos = parseNum('#gramosFilamento', 0);
     const horasImp = parseNum('#horasImpresion', 0);
@@ -90,20 +74,15 @@ export function initCalcTool(container){
     if (t.matches('input, select')) recalcDebounced();
   });
 
-  tabs.forEach(tab=>{
-    tab.addEventListener('click', ()=> switchTab(tab.dataset.tab));
-  });
-  nextButtons.forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const from = getCurrentTab();
-      if (!validateTab(from)) return;
-      const next = btn.dataset.next;
-      switchTab(next);
-    });
-  });
-  prevButtons.forEach(btn=>{
-    btn.addEventListener('click', ()=> switchTab(btn.dataset.prev));
-  });
+  tabs.forEach(tab=> tab.addEventListener('click', ()=> switchTab(tab.dataset.tab)));
+  nextButtons.forEach(btn=> btn.addEventListener('click', ()=>{
+    const next = btn.dataset.next;
+    if (!next) return; switchTab(next);
+  }));
+  prevButtons.forEach(btn=> btn.addEventListener('click', ()=>{
+    const prev = btn.dataset.prev;
+    if (!prev) return; switchTab(prev);
+  }));
 
   let pdfLoaded = false;
   async function ensurePdfLibs(){
@@ -160,7 +139,6 @@ export function initCalcTool(container){
     }
   });
 
-  // Estado inicial
   if (tabs[0]) switchTab(tabs[0].dataset.tab);
   recalc();
   inited = true;
