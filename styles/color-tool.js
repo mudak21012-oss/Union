@@ -14,15 +14,14 @@ export function initColorTool(container){
   root = container || document.getElementById('color-app');
   if (!root) throw new Error('color-app root no encontrado');
 
-  // === Query helpers (SCOPED) ===
   const $  = (sel) => root.querySelector(sel);
   const $$ = (sel) => Array.from(root.querySelectorAll(sel));
 
-  // === Canvas refs (SCOPED) ===
   const wheel = $('#wheel');
   const vbar  = $('#vbar');
   if (!wheel || !vbar) {
     console.warn('Markup del Color Finder incompleto dentro de #color-app');
+    initialized = true; // evita reintentos
     return;
   }
   wheelCtx = wheel.getContext('2d', { willReadFrequently:true });
@@ -30,7 +29,6 @@ export function initColorTool(container){
 
   CX = wheel.width/2; CY = wheel.height/2; R = Math.min(wheel.width, wheel.height)/2 - 10;
 
-  // === Utilidades originales (adaptadas) ===
   const clamp = (n,a,b)=>Math.min(b,Math.max(a,n));
   const normalizeHex = (h)=>{ if (typeof h !== 'string') return null;
     const s=h.trim(), r3=/^#?[0-9a-fA-F]{3}$/, r6=/^#?[0-9a-fA-F]{6}$/;
@@ -52,7 +50,6 @@ export function initColorTool(container){
   };
   const colorDistance = (a,b)=> Math.hypot(a.r-b.r, a.g-b.g, a.b-b.b);
 
-  // === Dibujo (reusado y optimizado) ===
   function drawWheel(){
     const img = wheelCtx.createImageData(wheel.width, wheel.height);
     for(let y=0;y<wheel.height;y++){
@@ -77,7 +74,6 @@ export function initColorTool(container){
     const y=(1-V)*vbar.height; vbarCtx.fillStyle="#ffffff"; vbarCtx.fillRect(0,y-1,vbar.width,2);
   }
 
-  // === IO y render (referencias al DOM SCOPED) ===
   const $dot = $('#dot'), $selRgb = $('#sel-rgb'), $selHex = $('#sel-hex');
   const $mainSw = $('#main-sw'), $mainName = $('#main-name'), $mainBrand = $('#main-brand');
   const $mainType = $('#main-type'), $mainStyle = $('#main-style'), $mainTemp = $('#main-temp');
@@ -94,31 +90,32 @@ export function initColorTool(container){
 
   function renderMainCard(a){
     if(!a) return;
-    $mainSw.style.background = a.hex;
-    $mainName.textContent = a.name || 'Sin nombre';
-    $mainBrand.textContent = a.brand || '-';
-    $mainType.textContent = a.type || '-';
-    $mainStyle.textContent = a.style || '-';
-    $mainTemp.textContent = a.temp || '-';
-    $mainStrength.textContent = a.strength || '-';
-    $mainHex.textContent = a.hex;
-    $mainLink.href = a.link || '#';
+    if ($mainSw) $mainSw.style.background = a.hex;
+    if ($mainName) $mainName.textContent = a.name || 'Sin nombre';
+    if ($mainBrand) $mainBrand.textContent = a.brand || '-';
+    if ($mainType) $mainType.textContent = a.type || '-';
+    if ($mainStyle) $mainStyle.textContent = a.style || '-';
+    if ($mainTemp) $mainTemp.textContent = a.temp || '-';
+    if ($mainStrength) $mainStrength.textContent = a.strength || '-';
+    if ($mainHex) $mainHex.textContent = a.hex;
+    if ($mainLink) $mainLink.href = a.link || '#';
 
-    if (a.img){
+    if (a.img && $preview){
       $preview.src = a.img; $preview.alt=`Vista previa ${a.name}`;
       $preview.onerror = ()=>{ $preview.removeAttribute('src'); };
       $preview.onclick = ()=> openLightbox(a.img);
-    } else { $preview.removeAttribute('src'); $preview.onclick=null; }
+    } else if ($preview) { $preview.removeAttribute('src'); $preview.onclick=null; }
 
-    // Ideas
-    $ideasBox.style.display = 'none'; $ideasList.innerHTML='';
-    $ideasBtn.onclick = ()=>{
-      $ideasList.innerHTML='';
-      const ideas = (a.ideas||'').split(';').map(s=>s.trim()).filter(Boolean);
-      if (!ideas.length){ $ideasList.innerHTML='<li style="color:var(--muted)">Sin ideas cargadas</li>'; }
-      else ideas.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; $ideasList.appendChild(li); });
-      $ideasBox.style.display='block';
-    };
+    if ($ideasBox && $ideasBtn && $ideasList){
+      $ideasBox.style.display = 'none'; $ideasList.innerHTML='';
+      $ideasBtn.onclick = ()=>{
+        $ideasList.innerHTML='';
+        const ideas = (a.ideas||'').split(';').map(s=>s.trim()).filter(Boolean);
+        if (!ideas.length){ $ideasList.innerHTML='<li style="color:var(--muted)">Sin ideas cargadas</li>'; }
+        else ideas.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; $ideasList.appendChild(li); });
+        $ideasBox.style.display='block';
+      };
+    }
   }
 
   function rankAndRenderBy(rgb){
@@ -171,7 +168,6 @@ export function initColorTool(container){
     rankAndRenderBy(rgb);
   }
 
-  // === Catálogo (carga única y cacheada) ===
   async function loadCatalog(){
     if (cache.items) return cache.items;
     const sheetUrl = root.getAttribute('data-sheet-url') || SHEET_URL_DEFAULT;
@@ -199,11 +195,11 @@ export function initColorTool(container){
     if (idx.hex === -1) throw new Error('Falta columna HEX');
     const items = [];
     rows.forEach(r=>{
-      const hex = normalizeHex(r[idx.hex]||''); if(!hex) return;
+      const normHex = normalizeHex(r[idx.hex]||''); if(!normHex) return;
       const it = {
         id: idx.id!==-1? (r[idx.id]||'').trim() : '',
         name: idx.name!==-1? (r[idx.name]||'').trim() : '',
-        hex, rgb: hexToRgb(hex),
+        hex: normHex, rgb: hexToRgb(normHex),
         brand: idx.brand!==-1? (r[idx.brand]||'').trim() : '',
         type: idx.type!==-1? (r[idx.type]||'').trim() : '',
         style: idx.style!==-1? (r[idx.style]||'').trim() : '',
@@ -217,18 +213,19 @@ export function initColorTool(container){
     });
     cache.items = items;
     cache.pool = items.slice();
-    // Vista previa inicial si hay imagen
     const firstImg = items[0]?.img;
-    if (firstImg && $preview) {
+    if (firstImg && root.querySelector('#preview-img')) {
+      const $preview = root.querySelector('#preview-img');
       $preview.src = firstImg; $preview.alt = `Vista previa ${items[0].name||''}`;
     }
     return items;
   }
 
-  // === Buscador / filtros (debounce) ===
   let debounceT;
   function debounce(fn, ms=120){ return (...a)=>{ clearTimeout(debounceT); debounceT=setTimeout(()=>fn(...a), ms);} }
   const applySearch = debounce(()=>{
+    const $q = root.querySelector('#q');
+    const $typeFilter = root.querySelector('#typeFilter');
     const t = ($q?.value||'').toLowerCase();
     const ty = $typeFilter?.value || '*';
     const hits = (cache.items||[]).filter(it=>{
@@ -237,8 +234,10 @@ export function initColorTool(container){
       return okType && (t==='' || hay.includes(t));
     });
     cache.pool = hits.length ? hits : (cache.items||[]);
+
     if (lastRGB) rankAndRenderBy(lastRGB);
-    // Sugerencias simples
+
+    const $sugs = root.querySelector('#sugs');
     if ($sugs){
       $sugs.innerHTML = '';
       if (t && cache.pool.length){
@@ -258,11 +257,9 @@ export function initColorTool(container){
     }
   }, 120);
 
-  // === Lightbox / modal eyedropper (focus management) ===
   const $lightbox = root.querySelector('#lightbox');
   const $lbImg = root.querySelector('#lb-img');
   const $lbClose = root.querySelector('#lb-close');
-
   function openLightbox(src){
     if(!$lightbox) return;
     $lbImg.src = src;
@@ -273,17 +270,14 @@ export function initColorTool(container){
   }
   function closeLightbox(){
     $lightbox?.classList.remove('show');
-    // devolver foco a botón CTA si existe
-    $mainLink?.focus();
+    root.querySelector('#main-link')?.focus();
   }
   $lbClose?.addEventListener('click', closeLightbox);
 
-  // Eyedropper modal (si lo usas con canvas de imagen)
   const $eyeModal = root.querySelector('#eyeModal');
   const $eyeClose = root.querySelector('#eye-close');
   $eyeClose?.addEventListener('click', ()=> $eyeModal?.classList.remove('show'));
 
-  // === Activación / Desactivación de listeners intensivos ===
   function attachDragListeners(){
     const onMove = (e)=> { if(draggingWheel) updateFromWheel(e.clientX,e.clientY); if(draggingV) updateFromVBar(e.clientY); };
     const onUp   = ()=> { draggingWheel=false; draggingV=false; };
@@ -292,29 +286,24 @@ export function initColorTool(container){
     cleanup = ()=>{ window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); cleanup=()=>{}; };
   }
 
-  // Handlers primarios (solo cuando activo)
   function activate(){
     drawWheel(); drawVBar();
-    // Inicio por click/drag
     wheel.addEventListener('mousedown', e=>{ draggingWheel=true; updateFromWheel(e.clientX,e.clientY); }, {passive:true});
     vbar.addEventListener('mousedown',  e=>{ draggingV=true;  updateFromVBar(e.clientY); }, {passive:true});
     attachDragListeners();
-    // Buscador
-    $q?.addEventListener('input', applySearch);
-    $typeFilter?.addEventListener('change', applySearch);
+
+    root.querySelector('#q')?.addEventListener('input', applySearch);
+    root.querySelector('#typeFilter')?.addEventListener('change', applySearch);
   }
 
   function deactivate(){
-    cleanup(); // remueve move/up globales
-    // No removemos listeners de inputs/botones porque viven toda la sesión y no son intensivos
+    cleanup();
   }
 
-  // === Boot ===
   initialized = true;
-  // Carga catálogo una sola vez (en paralelo al primer dibujo)
   loadCatalog().catch(console.error);
   activate();
 }
 
-export function onShow(){ /* reanuda acciones si hiciera falta */ }
-export function onHide(){ /* pausa listeners intensivos */ if (typeof cleanup === 'function') cleanup(); }
+export function onShow(){ /* no-op */ }
+export function onHide(){ if (typeof cleanup === 'function') cleanup(); }
