@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Hoho3D · Herramientas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Tipografía & Material Icons (carga única, no dupliques dentro de módulos) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Tema base común (header/nav) -->
+  <style>
+    :root{ --bg:#0b0c0f; --text:#e8ecf1; --muted:#a6adbb; --line:#1b1f28; --accent:#4f8cff; }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; font-family:Roboto, system-ui, -apple-system, Segoe UI, Arial, "Noto Sans", sans-serif; color:var(--text); background:linear-gradient(120deg,#0b0c0f,#0f1218); }
+    .app-header{ position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:16px;
+      padding:12px 20px; border-bottom:1px solid var(--line); background:#0b0c0fd9; backdrop-filter:saturate(140%) blur(6px);}
+    .app-header h1{ margin:0; font-size:16px; font-weight:600; letter-spacing:.2px; white-space:nowrap }
+    .app-nav{ margin-left:auto; display:flex; gap:8px }
+    .nav-btn{ appearance:none; border:1px solid var(--line); background:#12151d; color:var(--text);
+      padding:8px 12px; border-radius:10px; cursor:pointer; font-size:14px }
+    .nav-btn.is-active{ border-color:var(--accent); box-shadow:0 0 0 2px #000 inset }
+    main{ max-width:1280px; margin:0 auto; padding:16px; }
+    /* Accesibilidad visual para secciones ocultas con [hidden] (pero accesibles para lectores si aria-hidden) */
+    [hidden]{ display:none !important; }
+  </style>
+
+  <!-- Estilos propios (YA escopados por contenedor raíz) -->
+  <link rel="stylesheet" href="./styles/color.css">
+  <link rel="stylesheet" href="./styles/calc.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Hoho3D · Herramientas</h1>
+    <nav class="app-nav" role="tablist" aria-label="Herramientas Hoho3D">
+      <button id="tab-color" data-target="#color-app" class="nav-btn is-active" role="tab" aria-selected="true" aria-controls="color-app">Color Finder</button>
+      <button id="tab-calc" data-target="#calc-app" class="nav-btn" role="tab" aria-selected="false" aria-controls="calc-app">Calculadora de Costos</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ========== Color Finder (Pega aquí TODO el markup original) ========== -->
+    <section id="color-app" role="tabpanel" aria-labelledby="tab-color">
+      <!-- Pega tu index.html del Buscador por color COMPLETO dentro de este contenedor.
+           No cambies clases/IDs salvo los indicados en el informe.  -->
+    </section>
+
+    <!-- ========== Calculadora de Costos (Pega aquí TODO el markup original) ========== -->
+    <section id="calc-app" role="tabpanel" aria-labelledby="tab-calc" hidden>
+      <!-- Pega tu index.html de la Calculadora COMPLETO dentro de este contenedor. -->
+    </section>
+  </main>
+
+  <!-- Router de tabs + Lazy init (ES Modules) -->
+  <script type="module">
+    import { initColorTool, onShow as showColor, onHide as hideColor } from './color-tool.js';
+    import { initCalcTool, onShow as showCalc, onHide as hideCalc } from './calc-tool.js';
+
+    const sections = /** @type {Record<string, HTMLElement>} */({
+      '#color-app': document.querySelector('#color-app'),
+      '#calc-app': document.querySelector('#calc-app')
+    });
+
+    const state = { colorInit:false, calcInit:false, current:'#color-app' };
+
+    function setActive(btn, active){
+      btn.classList.toggle('is-active', !!active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.setAttribute('tabindex', active ? '0' : '-1');
+    }
+
+    function show(target){
+      if (state.current === target) return;
+      // Oculta actual
+      const prev = state.current;
+      if (prev && sections[prev]) {
+        sections[prev].hidden = true;
+        sections[prev].setAttribute('aria-hidden','true');
+        // Hooks de ocultar
+        if (prev === '#color-app') hideColor?.();
+        if (prev === '#calc-app') hideCalc?.();
+        sections[prev].dispatchEvent(new CustomEvent('spa:hide', {bubbles:false}));
+      }
+
+      // Muestra target
+      const el = sections[target];
+      el.hidden = false;
+      el.removeAttribute('aria-hidden');
+
+      // Lazy init
+      if (target === '#color-app' && !state.colorInit) { initColorTool(el); state.colorInit = true; }
+      if (target === '#calc-app' && !state.calcInit) { initCalcTool(el); state.calcInit = true; }
+
+      // Hooks de mostrar
+      if (target === '#color-app') showColor?.();
+      if (target === '#calc-app') showCalc?.();
+
+      el.dispatchEvent(new CustomEvent('spa:show', {bubbles:false}));
+      state.current = target;
+    }
+
+    // Binding tabs
+    const buttons = Array.from(document.querySelectorAll('.nav-btn'));
+    buttons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const target = btn.dataset.target;
+        buttons.forEach(b=> setActive(b, b===btn));
+        show(target);
+      });
+    });
+
+    // Keyboard roving focus (izq/der)
+    document.querySelector('.app-nav').addEventListener('keydown', (e)=>{
+      const idx = buttons.findIndex(b=>b.classList.contains('is-active'));
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const delta = e.key === 'ArrowRight' ? 1 : -1;
+        const next = (idx + delta + buttons.length) % buttons.length;
+        buttons[next].focus(); buttons[next].click();
+      }
+    });
+
+    // Vista inicial
+    // Si quieres abrir la calculadora por defecto, cambia a '#calc-app'
+    show('#color-app');
+  </script>
+</body>
+</html>
