@@ -196,3 +196,627 @@
             </div>
             <div class="tab" data-tab="results">
               <i class="material-icons">payments</i>
+              Resultados
+            </div>
+          </div>
+
+          <!-- Pestaña: Configuración Básica -->
+          <div class="tab-content active" id="basic-tab">
+            <div class="section-header">
+              <h3><i class="material-icons">local_fire_department</i> Filamento e Impresora</h3>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="tipoFilamento" class="required-field">Tipo de filamento</label>
+                <input id="tipoFilamento" name="tipoFilamento" type="text" class="form-control" required>
+                <span class="helper-text">Ejemplo: PLA, ABS, PETG</span>
+              </div>
+
+              <div class="form-group">
+                <label for="costoFilamento" class="required-field">Costo filamento por kilo (ARS)</label>
+                <input id="costoFilamento" type="number" min="0" step="any" class="form-control" required>
+                <span class="helper-text">Ejemplo: 4000 (para un rollo de 1kg)</span>
+              </div>
+
+              <div class="form-group">
+                <label for="nombreImpresora" class="required-field">¿Qué impresora usás?</label>
+                <input id="nombreImpresora" type="text" class="form-control" required>
+                <span class="helper-text">Ejemplo: Ender 3, Prusa i3</span>
+              </div>
+
+              <div class="form-group">
+                <label for="costoImpresora" class="required-field">Costo impresora (ARS)</label>
+                <input id="costoImpresora" type="number" min="0" step="any" class="form-control" required>
+                <span class="helper-text">Precio actual de tu impresora</span>
+              </div>
+            </div>
+
+            <div class="switch-container" id="advancedConfigContainer">
+              <div class="switch">
+                <input type="checkbox" id="toggleAdvancedConfig">
+                <span class="slider"></span>
+              </div>
+              <span>Configuración Avanzada</span>
+            </div>
+
+            <div id="advancedConfigFields" class="optional-fields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="impresionesAnio">Impresiones estimadas/año</label>
+                  <input id="impresionesAnio" type="number" min="1" step="any" class="form-control" value="50">
+                  <span class="helper-text">Cantidad aproximada de impresiones anuales</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="depreciacionImpresora">Depreciación impresora/año (%)</label>
+                  <input id="depreciacionImpresora" type="number" min="1" max="100" class="form-control" value="10">
+                  <span class="helper-text">Porcentaje que pierde valor tu impresora</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="switch-container" id="fixedCostsContainer">
+              <div class="switch">
+                <input type="checkbox" id="toggleFixedCosts">
+                <span class="slider"></span>
+              </div>
+              <span>Costos Fijos</span>
+            </div>
+
+            <div id="fixedCostsFields" class="optional-fields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="costoEnergia">Costo energético KW/h (ARS)</label>
+                  <input id="costoEnergia" type="number" min="0" step="any" class="form-control" value="120">
+                  <span class="helper-text">Precio actual de la electricidad</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="consumoImpresora">Consumo impresora (Watts/h)</label>
+                  <input id="consumoImpresora" type="number" min="0" step="any" class="form-control" value="150">
+                  <span class="helper-text">Consumo de tu impresora en Watts</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="switch-container" id="pcContainer">
+              <div class="switch">
+                <input type="checkbox" id="togglePC">
+                <span class="slider"></span>
+              </div>
+              <span>Incluir Costos de Computadora</span>
+            </div>
+
+            <div id="pcFields" class="optional-fields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="costoPC">Costo equipo de cómputo (ARS)</label>
+                  <input id="costoPC" type="number" min="0" step="any" class="form-control" value="150000">
+                  <span class="helper-text">Valor de tu computadora</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="horasPC">Horas uso PC por impresión</label>
+                  <input id="horasPC" type="number" min="0" step="any" class="form-control" value="0.5">
+                  <span class="helper-text">Tiempo que usas la PC para preparar</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="switch-container" id="rentaContainer">
+              <div class="switch">
+                <input type="checkbox" id="toggleRenta">
+                <span class="slider"></span>
+              </div>
+              <span>Incluir Renta</span>
+            </div>
+
+            <div id="rentaFields" class="optional-fields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="renta">¿Pagás renta? (ARS)</label>
+                  <input id="renta" type="number" min="0" step="any" class="form-control" value="20000">
+                  <span class="helper-text">Costo mensual de alquiler</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="switch-container" id="consumiblesContainer">
+              <div class="switch">
+                <input type="checkbox" id="toggleConsumibles">
+                <span class="slider"></span>
+              </div>
+              <span>Incluir Consumibles</span>
+            </div>
+
+            <div id="consumiblesFields" class="optional-fields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="alcohol">Alcohol isopropílico (ARS)</label>
+                  <input id="alcohol" type="number" min="0" step="any" class="form-control" value="1500">
+                  <span class="helper-text">Costo por botella</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="adherente">Adherente cama impresión (ARS)</label>
+                  <input id="adherente" type="number" min="0" step="any" class="form-control" value="800">
+                  <span class="helper-text">Ejemplo: laca, pegamento</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="camaMagnetica">Cama magnética (ARS)</label>
+                  <input id="camaMagnetica" type="number" min="0" step="any" class="form-control" value="4000">
+                  <span class="helper-text">Costo de reposición</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="memoriaSD">Memoria SD/MicroSD (ARS)</label>
+                  <input id="memoriaSD" type="number" min="0" step="any" class="form-control" value="1500">
+                  <span class="helper-text">Costo de la memoria</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="otrosConsumibles">Otros consumibles (ARS)</label>
+                  <input id="otrosConsumibles" type="number" min="0" step="any" class="form-control" value="1000">
+                  <span class="helper-text">Cualquier otro material</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="degradacionConsumibles">% Degradación consumibles</label>
+                  <input id="degradacionConsumibles" type="number" min="0" max="100" class="form-control" value="0.5">
+                  <span class="helper-text">% que se gasta por impresión</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button type="button" class="btn btn-secondary" disabled>
+                <i class="material-icons">navigate_before</i> Anterior
+              </button>
+              <button type="button" class="btn btn-primary next-tab" data-next="printing">
+                Siguiente <i class="material-icons">navigate_next</i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pestaña: Impresión -->
+          <div class="tab-content" id="printing-tab">
+            <div class="section-header">
+              <h3><i class="material-icons">print</i> Detalles de Impresión</h3>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="gramosFilamento">Filamento consumido (g)</label>
+                <input id="gramosFilamento" type="number" min="0" step="any" class="form-control" value="150">
+                <span class="helper-text">Gramos que usará la impresión</span>
+              </div>
+
+              <div class="form-group">
+                <label for="horasImpresion">Horas de impresión</label>
+                <input id="horasImpresion" type="number" min="0" step="any" class="form-control" value="5">
+                <span class="helper-text">Tiempo estimado de impresión</span>
+              </div>
+
+              <div class="form-group">
+                <label for="factorError">Factor de error de impresión</label>
+                <input id="factorError" type="number" min="1" step="any" class="form-control" value="1.2">
+                <span class="helper-text">1.2 si sueles tener fallas</span>
+              </div>
+
+              <div class="form-group">
+                <label for="sueldoHora">Sueldo por hora (ARS)</label>
+                <input id="sueldoHora" type="number" min="0" step="any" class="form-control" value="1500">
+                <span class="helper-text">Lo que vale tu tiempo</span>
+              </div>
+
+              <div class="form-group">
+                <label for="gananciaHora">Ganancia por hora (ARS)</label>
+                <input id="gananciaHora" type="number" min="0" step="any" class="form-control" value="500">
+                <span class="helper-text">Beneficio que quieres obtener</span>
+              </div>
+            </div>
+
+            <div class="switch-container" id="postProcessContainer">
+              <div class="switch">
+                <input type="checkbox" id="togglePostProcess">
+                <span class="slider"></span>
+              </div>
+              <span>Incluir Postprocesado</span>
+            </div>
+
+            <div id="postProcessFields" class="optional-fields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="horasPostproc">Horas de postprocesado</label>
+                  <input id="horasPostproc" type="number" min="0" step="any" class="form-control" value="2">
+                  <span class="helper-text">Tiempo de trabajo manual</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="costoPegamento">Costo del pegamento (ARS)</label>
+                  <input id="costoPegamento" type="number" min="0" step="any" class="form-control" value="200">
+                  <span class="helper-text">Para unir piezas</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="sueldoHoraPostproc">Sueldo postproc. (ARS/h)</label>
+                  <input id="sueldoHoraPostproc" type="number" min="0" step="any" class="form-control" value="1000">
+                  <span class="helper-text">Valor de tu tiempo en postproceso</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="otrosPostproc">Otros costos (ARS)</label>
+                  <input id="otrosPostproc" type="number" min="0" step="any" class="form-control" value="100">
+                  <span class="helper-text">Materiales adicionales</span>
+                </div>
+              </div>
+
+              <div class="switch-container" id="lijadoContainer">
+                <div class="switch">
+                  <input type="checkbox" id="toggleLijado">
+                  <span class="slider"></span>
+                </div>
+                <span>Incluir Lijado</span>
+              </div>
+
+              <div id="lijadoFields" class="optional-fields sub-section">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="tipoLijado">Tipo de lijado</label>
+                    <select id="tipoLijado" class="form-control">
+                      <option value="" disabled selected>Elige una opción</option>
+                      <option value="manual">Manual</option>
+                      <option value="lijadora" selected>Lijadora</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="costoLijadora">Costo lijadora (ARS)</label>
+                    <input id="costoLijadora" type="number" min="0" step="any" class="form-control" value="5000">
+                    <span class="helper-text">Si usas lijadora eléctrica</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="cantidadLijas">Cantidad de lijas</label>
+                    <input id="cantidadLijas" type="number" min="0" step="1" class="form-control" value="2">
+                    <span class="helper-text">Lijas usadas por pieza</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="costoLija">Costo por lija (ARS)</label>
+                    <input id="costoLija" type="number" min="0" step="any" class="form-control" value="150">
+                    <span class="helper-text">Costo unitario</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="switch-container" id="paintContainer">
+                <div class="switch">
+                  <input type="checkbox" id="togglePaint">
+                  <span class="slider"></span>
+                </div>
+                <span>Incluir Pintura</span>
+              </div>
+
+              <div id="paintFields" class="optional-fields sub-section">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="horasPintura">Horas de pintura</label>
+                    <input id="horasPintura" type="number" min="0" step="any" class="form-control" value="1.5">
+                    <span class="helper-text">Tiempo estimado</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="compresorPropio">¿Compresor propio?</label>
+                    <select id="compresorPropio" class="form-control">
+                      <option value="" disabled selected>Elige una opción</option>
+                      <option value="si" selected>Sí</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="costoCompresor">Costo compresor (ARS)</label>
+                    <input id="costoCompresor" type="number" min="0" step="any" class="form-control" value="15000">
+                    <span class="helper-text">Si no es propio, poner 0</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="costoAerografo">Costo aerógrafo (ARS)</label>
+                    <input id="costoAerografo" type="number" min="0" step="any" class="form-control" value="8000">
+                    <span class="helper-text">Costo del equipo</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="costoPrimer">Pintura primaria/primer (ARS)</label>
+                    <input id="costoPrimer" type="number" min="0" step="any" class="form-control" value="1200">
+                    <span class="helper-text">Costo de la pintura base</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="costoPintura">Pintura final (ARS)</label>
+                    <input id="costoPintura" type="number" min="0" step="any" class="form-control" value="1800">
+                    <span class="helper-text">Costo de la pintura color</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="costoDiluyente">Diluyente (ARS)</label>
+                    <input id="costoDiluyente" type="number" min="0" step="any" class="form-control" value="700">
+                    <span class="helper-text">Para limpieza de herramientas</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="sueldoHoraPintura">Sueldo pintura (ARS/h)</label>
+                    <input id="sueldoHoraPintura" type="number" min="0" step="any" class="form-control" value="1500">
+                    <span class="helper-text">Valor de tu tiempo pintando</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="otrosPintura">Otros costos (ARS)</label>
+                    <input id="otrosPintura" type="number" min="0" step="any" class="form-control" value="300">
+                    <span class="helper-text">Materiales adicionales</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button type="button" class="btn btn-secondary prev-tab" data-prev="basic">
+                <i class="material-icons">navigate_before</i> Anterior
+              </button>
+              <button type="button" class="btn btn-primary next-tab" data-next="shipping">
+                Siguiente <i class="material-icons">navigate_next</i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pestaña: Envío -->
+          <div class="tab-content" id="shipping-tab">
+            <div class="switch-container" id="empaqueContainer">
+              <div class="switch">
+                <input type="checkbox" id="toggleEmpaque">
+                <span class="slider"></span>
+              </div>
+              <span>Incluir Costos de Empaque</span>
+            </div>
+
+            <div id="empaqueFields" class="optional-fields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="empaque">Costo material empaque (ARS)</label>
+                  <input id="empaque" type="number" min="0" step="any" class="form-control" value="500">
+                  <span class="helper-text">Cajas, burbujas, etc.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="switch-container" id="shippingConfigContainer">
+              <div class="switch">
+                <input type="checkbox" id="toggleShippingConfig">
+                <span class="slider"></span>
+              </div>
+              <span>Incluir detalles de envío</span>
+            </div>
+
+            <div id="shippingConfigFields" class="optional-fields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="paqueteria">Paquetería nacional</label>
+                  <select id="paqueteria" class="form-control">
+                    <option value="" disabled selected>Elige una opción</option>
+                    <option value="correo" selected>Correo Argentino</option>
+                    <option value="andreani">Andreani</option>
+                    <option value="viaCargo">Vía Cargo</option>
+                    <option value="otro">Otro</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="pesoPaquete">Peso total paquete (kg)</label>
+                  <input id="pesoPaquete" type="number" min="0" step="any" class="form-control" value="0.5">
+                  <span class="helper-text">Peso estimado con empaque</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="envioNacional">Costo envío nacional (ARS)</label>
+                  <input id="envioNacional" type="number" min="0" step="any" class="form-control" value="2500">
+                  <span class="helper-text">Se calcula automáticamente o ingresa manualmente</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-header">
+              <h3><i class="material-icons">gavel</i> Impuestos y Comisiones</h3>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="iva">Porcentaje de impuestos (IVA)</label>
+                <input id="iva" type="number" min="0" max="100" step="any" class="form-control" value="21">
+                <span class="helper-text">21% es el valor estándar</span>
+              </div>
+
+              <div class="form-group">
+                <div class="switch-container" id="mercadoLibreContainer">
+                  <div class="switch">
+                    <input type="checkbox" id="mercadoLibre" checked>
+                    <span class="slider"></span>
+                  </div>
+                  <span>Incluir recargo Mercado Libre (10%)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button type="button" class="btn btn-secondary prev-tab" data-prev="printing">
+                <i class="material-icons">navigate_before</i> Anterior
+              </button>
+              <button type="button" class="btn btn-primary next-tab" data-next="results">
+                Siguiente <i class="material-icons">navigate_next</i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pestaña: Resultados -->
+          <div class="tab-content" id="results-tab">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="nombreCliente">Nombre del cliente (opcional)</label>
+                <input id="nombreCliente" type="text" class="form-control" placeholder="Ej: Juan Pérez">
+                <span class="helper-text">Para incluir en el presupuesto PDF</span>
+              </div>
+            </div>
+
+            <div class="alert" id="calculationAlert">
+              <i class="material-icons">error</i>
+              <span>Por favor completa los campos requeridos en las pestañas anteriores</span>
+            </div>
+
+            <div class="success-message" id="calculationSuccess">
+              <i class="material-icons">check_circle</i>
+              <span>Cálculo completado exitosamente</span>
+            </div>
+
+            <div class="summary-sub">
+              <div>Ganancia total por horas impresión:</div>
+              <div id="gananciaTotalPreview" class="text-warning">—</div>
+            </div>
+
+            <div class="summary-sub">
+              <div>Sueldo total por horas trabajo:</div>
+              <div id="sueldoTotalPreview" class="text-warning">—</div>
+            </div>
+
+            <div class="result-highlight">
+              <div class="text-important">Total Final Recomendado</div>
+              <div id="totalFinalValue" class="value">—</div>
+              <div class="text-info">Este es el precio que deberías cobrar por tu impresión</div>
+            </div>
+
+            <div class="summary-table">
+              <table id="summaryTable">
+                <thead>
+                  <tr>
+                    <th>Concepto</th>
+                    <th>Monto (ARS)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Depreciación impresora</td><td id="depImpresoraCell">—</td></tr>
+                  <tr><td>Depreciación PC</td><td id="depPCCell">—</td></tr>
+                  <tr><td>Filamento utilizado</td><td id="filamentoCell">—</td></tr>
+                  <tr><td>Electricidad impresora</td><td id="electricidadCell">—</td></tr>
+                  <tr><td>Electricidad PC</td><td id="electricidadPCCell">—</td></tr>
+                  <tr><td>Renta (proporcional)</td><td id="rentaCell">—</td></tr>
+                  <tr><td>Consumibles (proporcional)</td><td id="consumiblesCell">—</td></tr>
+                  <tr><td>Mano de obra impresión</td><td id="manoObraCell">—</td></tr>
+                  <tr><td>Postprocesado</td><td id="postprocCell">—</td></tr>
+                  <tr><td>Pintura</td><td id="pinturaCell">—</td></tr>
+                  <tr><td>Envío y empaque</td><td id="envioCell">—</td></tr>
+                  <tr><td><b>Recargo Mercado Libre</b></td><td id="mlCell" class="text-warning"><b>—</b></td></tr>
+                  <tr><td><b>IVA (21%)</b></td><td id="ivaCell" class="text-warning"><b>—</b></td></tr>
+                  <tr><td><b>TOTAL FINAL</b></td><td id="totalFinalCell" class="text-success"><b>—</b></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="export-buttons">
+              <div class="export-btn" id="exportPDFBtn">
+                <i class="material-icons">picture_as_pdf</i> Exportar a PDF
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button type="button" class="btn btn-secondary prev-tab" data-prev="shipping">
+                <i class="material-icons">navigate_before</i> Anterior
+              </button>
+              <button type="button" class="btn btn-accent" id="restartBtn">
+                <i class="material-icons">restart_alt</i> Nuevo Cálculo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="note">
+          <i class="material-icons">info_outline</i>
+          Todos los montos son aproximados y de referencia. Esta calculadora te ayuda a estimar costos reales para tu negocio de impresión 3D.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SPA Router + Lazy init -->
+  <script type="module">
+    import { initColorTool, onShow as showColor, onHide as hideColor } from './color-tool.js';
+    import { initCalcTool, onShow as showCalc, onHide as hideCalc } from './calc-tool.js';
+
+    const sections = {
+      '#color-app': document.querySelector('#color-app'),
+      '#calc-app': document.querySelector('#calc-app')
+    };
+    const state = { colorInit:false, calcInit:false, current:'#color-app' };
+
+    function setActive(btn, active){
+      btn.classList.toggle('is-active', !!active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.setAttribute('tabindex', active ? '0' : '-1');
+    }
+
+    function show(target){
+      if (state.current === target) return;
+
+      // Ocultar actual
+      const prev = state.current;
+      if (prev && sections[prev]) {
+        sections[prev].hidden = true;
+        sections[prev].setAttribute('aria-hidden','true');
+        if (prev === '#color-app' && typeof hideColor === 'function') hideColor();
+        if (prev === '#calc-app' && typeof hideCalc === 'function') hideCalc();
+        sections[prev].dispatchEvent(new CustomEvent('spa:hide', {bubbles:false}));
+      }
+
+      // Mostrar destino
+      const el = sections[target];
+      el.hidden = false;
+      el.removeAttribute('aria-hidden');
+
+      // Lazy init
+      if (target === '#color-app' && !state.colorInit) { initColorTool(el); state.colorInit = true; }
+      if (target === '#calc-app' && !state.calcInit) { initCalcTool(el); state.calcInit = true; }
+
+      // Hooks de mostrar
+      if (target === '#color-app' && typeof showColor === 'function') showColor();
+      if (target === '#calc-app' && typeof showCalc === 'function') showCalc();
+
+      el.dispatchEvent(new CustomEvent('spa:show', {bubbles:false}));
+      state.current = target;
+    }
+
+    // Tabs
+    const buttons = Array.from(document.querySelectorAll('.nav-btn'));
+    buttons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const target = btn.dataset.target;
+        buttons.forEach(b=> setActive(b, b===btn));
+        show(target);
+      });
+    });
+
+    // Navegación con teclado (izq/der)
+    document.querySelector('.app-nav').addEventListener('keydown', (e)=>{
+      const idx = buttons.findIndex(b=>b.classList.contains('is-active'));
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const delta = e.key === 'ArrowRight' ? 1 : -1;
+        const next = (idx + delta + buttons.length) % buttons.length;
+        buttons[next].focus(); buttons[next].click();
+      }
+    });
+
+    // Vista inicial
+    show('#color-app');
+  </script>
+</body>
+</html>
