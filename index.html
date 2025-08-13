@@ -748,75 +748,76 @@
   </main>
 
   <!-- SPA Router + Lazy init -->
-  <script type="module">
-    import { initColorTool, onShow as showColor, onHide as hideColor } from './color-tool.js';
-    import { initCalcTool, onShow as showCalc, onHide as hideCalc } from './calc-tool.js';
+ <script type="module">
+  import { initColorTool, onShow as showColor, onHide as hideColor } from './color-tool.js';
+  import { initCalcTool, onShow as showCalc, onHide as hideCalc } from './calc-tool.js';
 
-    const sections = {
-      '#color-app': document.querySelector('#color-app'),
-      '#calc-app': document.querySelector('#calc-app')
-    };
-    const state = { colorInit:false, calcInit:false, current:'#color-app' };
+  const sections = {
+    '#color-app': document.querySelector('#color-app'),
+    '#calc-app': document.querySelector('#calc-app')
+  };
 
-    function setActive(btn, active){
-      btn.classList.toggle('is-active', !!active);
-      btn.setAttribute('aria-selected', active ? 'true' : 'false');
-      btn.setAttribute('tabindex', active ? '0' : '-1');
+  // IMPORTANTE: current = null para forzar la primera inicialización
+  const state = { colorInit:false, calcInit:false, current:null };
+
+  function setActive(btn, active){
+    btn.classList.toggle('is-active', !!active);
+    btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    btn.setAttribute('tabindex', active ? '0' : '-1');
+  }
+
+  function show(target){
+    // Si ya estamos en target pero NO está inicializado, igual inicializamos
+    if (state.current === target && (
+      (target === '#color-app' && state.colorInit) ||
+      (target === '#calc-app' && state.calcInit)
+    )) return;
+
+    const prev = state.current;
+    if (prev && sections[prev]) {
+      sections[prev].hidden = true;
+      sections[prev].setAttribute('aria-hidden','true');
+      if (prev === '#color-app') hideColor?.();
+      if (prev === '#calc-app') hideCalc?.();
+      sections[prev].dispatchEvent(new CustomEvent('spa:hide', {bubbles:false}));
     }
 
-    function show(target){
-      if (state.current === target) return;
+    const el = sections[target];
+    el.hidden = false;
+    el.removeAttribute('aria-hidden');
 
-      // Ocultar actual
-      const prev = state.current;
-      if (prev && sections[prev]) {
-        sections[prev].hidden = true;
-        sections[prev].setAttribute('aria-hidden','true');
-        if (prev === '#color-app' && typeof hideColor === 'function') hideColor();
-        if (prev === '#calc-app' && typeof hideCalc === 'function') hideCalc();
-        sections[prev].dispatchEvent(new CustomEvent('spa:hide', {bubbles:false}));
-      }
+    if (target === '#color-app' && !state.colorInit) { initColorTool(el); state.colorInit = true; }
+    if (target === '#calc-app' && !state.calcInit) { initCalcTool(el); state.calcInit = true; }
 
-      // Mostrar destino
-      const el = sections[target];
-      el.hidden = false;
-      el.removeAttribute('aria-hidden');
+    if (target === '#color-app') showColor?.();
+    if (target === '#calc-app') showCalc?.();
 
-      // Lazy init
-      if (target === '#color-app' && !state.colorInit) { initColorTool(el); state.colorInit = true; }
-      if (target === '#calc-app' && !state.calcInit) { initCalcTool(el); state.calcInit = true; }
+    el.dispatchEvent(new CustomEvent('spa:show', {bubbles:false}));
+    state.current = target;
+  }
 
-      // Hooks de mostrar
-      if (target === '#color-app' && typeof showColor === 'function') showColor();
-      if (target === '#calc-app' && typeof showCalc === 'function') showCalc();
+  const buttons = Array.from(document.querySelectorAll('.nav-btn'));
+  buttons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const target = btn.dataset.target;
+      buttons.forEach(b=> setActive(b, b===btn));
+      show(target);
+    });
+  });
 
-      el.dispatchEvent(new CustomEvent('spa:show', {bubbles:false}));
-      state.current = target;
+  document.querySelector('.app-nav').addEventListener('keydown', (e)=>{
+    const idx = buttons.findIndex(b=>b.classList.contains('is-active'));
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const delta = e.key === 'ArrowRight' ? 1 : -1;
+      const next = (idx + delta + buttons.length) % buttons.length;
+      buttons[next].focus(); buttons[next].click();
     }
+  });
 
-    // Tabs
-    const buttons = Array.from(document.querySelectorAll('.nav-btn'));
-    buttons.forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const target = btn.dataset.target;
-        buttons.forEach(b=> setActive(b, b===btn));
-        show(target);
-      });
-    });
+  // Vista inicial (ahora sí inicializa)
+  show('#color-app');
+</script>
 
-    // Navegación con teclado (izq/der)
-    document.querySelector('.app-nav').addEventListener('keydown', (e)=>{
-      const idx = buttons.findIndex(b=>b.classList.contains('is-active'));
-      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const delta = e.key === 'ArrowRight' ? 1 : -1;
-        const next = (idx + delta + buttons.length) % buttons.length;
-        buttons[next].focus(); buttons[next].click();
-      }
-    });
-
-    // Vista inicial
-    show('#color-app');
-  </script>
 </body>
 </html>
