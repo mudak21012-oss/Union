@@ -135,16 +135,15 @@
   padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#12151d; color:white; cursor:pointer;
 }
 
-/* Modal de eyedropper (si aplica) */
+/* Modal de eyedropper */
 #color-app #eyeModal{
   position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center;
 }
 #color-app #eyeModal.show{ display:flex }
-#color-app .modal{
+#color-app .modal-card{
   background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; width:min(520px, 92vw);
 }
-#color-app .modal header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px }
-#color-app .modal .modal-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:14px }
+#color-app .modal-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:14px }
 
 /* Lista de ideas */
 #color-app #ideas-box{ display:none; margin-top:10px }
@@ -158,6 +157,7 @@
 /* Formularios (buscador) */
 #color-app .search-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
 #color-app .search-row input[type="text"],
+#color-app .search-row input[type="search"],
 #color-app .search-row select{
   background:#121826; border:1px solid var(--line); color:var(--text);
   padding:10px 12px; border-radius:10px; min-width:180px;
