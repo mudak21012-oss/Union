@@ -26,7 +26,6 @@
                    radial-gradient(1200px 600px at -10% 120%, #14323a 0%, transparent 40%),
                    linear-gradient(180deg, #0f1522, #0b1018);
       --shadow: 0 12px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);
-      --glass: rgba(255,255,255,.06);
       --focus: 0 0 0 3px rgba(122,162,255,.35);
     }
     *{ box-sizing:border-box }
@@ -36,7 +35,7 @@
       color:var(--text); background: radial-gradient(80vw 60vh at 20% -10%, #132133 0%, transparent 60%), var(--bg);
     }
 
-    /* ===== Header (3 columnas: Inicio | Título | Tabs) ===== */
+    /* ===== Header (Inicio | Título | Tabs) ===== */
     .app-header{
       position:sticky; top:0; z-index:10; display:grid; grid-template-columns:auto 1fr auto; align-items:center;
       gap:12px; padding:12px 16px; border-bottom:1px solid var(--line);
@@ -85,11 +84,9 @@
       -webkit-background-clip:text; background-clip:text; color:transparent;
       text-shadow: 0 8px 52px rgba(0,0,0,.45);
     }
-    .cards{
-      display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:18px;
-    }
+    .cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:22px }
     .card{
-      border:1px solid var(--line); background: var(--card-grad); border-radius:16px; padding:18px;
+      border:1px solid var(--line); background: var(--card-grad); border-radius:16px; padding:20px;
       display:grid; gap:12px; box-shadow: var(--shadow); position:relative; overflow:hidden;
     }
     .card::after{
@@ -99,19 +96,43 @@
     }
     .card-header{ display:flex; align-items:center; gap:12px }
     .icon-badge{
-      width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+      width:44px; height:44px; border-radius:12px; display:grid; place-items:center;
       background: linear-gradient(135deg, #142036, #203258);
       border:1px solid #22324a; color:#bcd3ff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
     }
-    .card h2{ margin:0; font-size:18px }
+    .card h2{ margin:0; font-size:20px }
     .card p{ margin:0; color:var(--muted); font-size:14px; line-height:1.45 }
-    .card .btn{
-      justify-self:start; background: var(--btn-grad); border:1px solid transparent;
-      padding:10px 14px; border-radius:12px; color:var(--text); display:inline-flex; gap:8px; align-items:center;
-      box-shadow: var(--shadow); cursor:pointer; text-decoration:none;
+
+    /* ==== CTAs mejoradas (hero) ==== */
+    .card .cta-btn{
+      border:1px solid transparent;
+      background: linear-gradient(135deg,#27324a 0%, #263252 25%, #2a4b9b 60%, #3866ff 100%);
+      color:#fff; padding:12px 16px; border-radius:14px;
+      display:inline-flex; align-items:center; gap:10px;
+      font-weight:700; letter-spacing:.2px; cursor:pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+      position:relative; overflow:hidden; transition: transform .15s ease, filter .2s ease, box-shadow .2s ease;
     }
-    .card .btn:hover{ background: var(--btn-grad-hover) }
-    .card .btn:focus{ outline:none; box-shadow: var(--focus), var(--shadow) }
+    .card .cta-btn .material-icons{ font-size:18px; opacity:.95 }
+    .card .cta-btn:hover{ transform: translateY(-1px); filter:saturate(120%); box-shadow: 0 14px 28px rgba(0,0,0,.45), 0 0 0 3px rgba(122,162,255,.18) }
+    .card .cta-btn:active{ transform: translateY(0) scale(.99) }
+    .card .cta-btn:focus{ outline:none; box-shadow: 0 0 0 3px rgba(122,162,255,.35), 0 10px 24px rgba(0,0,0,.35) }
+    .card .cta-btn::after{
+      content:""; position:absolute; top:-120%; left:-30%; width:60%; height:340%;
+      transform:rotate(28deg); pointer-events:none; opacity:0;
+      background: linear-gradient( to right, transparent 0%, rgba(255,255,255,.22) 48%, transparent 100% );
+      transition: opacity .35s ease, transform .8s ease;
+    }
+    .card .cta-btn:hover::after{ opacity:.8; transform: translateX(220%) rotate(28deg) }
+    .card .cta-sub{ margin-top:6px; color:#bcd; font-size:12px; opacity:.9 }
+
+    /* Variante de color para Calculadora (money vibe) */
+    .card.calc .cta-btn{
+      background: linear-gradient(135deg,#274a40 0%, #225b57 30%, #1f7f7a 60%, #00c9aa 100%);
+    }
+    .card.calc .cta-btn:hover{
+      box-shadow: 0 14px 28px rgba(0,0,0,.45), 0 0 0 3px rgba(0,255,208,.20);
+    }
 
     @media (max-width: 620px){
       .app-header{ grid-template-columns:1fr auto; grid-template-areas:
@@ -121,9 +142,7 @@
       .home-btn{ grid-area:home; justify-self:start }
       .app-nav{ grid-area:nav; justify-self:end }
     }
-    @media (prefers-reduced-motion: reduce){
-      *{ transition:none !important }
-    }
+    @media (prefers-reduced-motion: reduce){ *{ transition:none !important } }
   </style>
 </head>
 <body>
@@ -162,20 +181,30 @@
               <h2>Color Finder</h2>
             </div>
             <p>Explorá el catálogo por color, con sugerencias, ideas y visor de imágenes.</p>
-            <button class="btn nav-btn" data-target="#frame-color">
-              <span class="material-icons" aria-hidden="true">open_in_new</span> Abrir
+
+            <!-- CTA potente -->
+            <button class="nav-btn cta-btn" data-target="#frame-color"
+                    aria-label="Abrir Color Finder y encontrar mi color ideal">
+              <span class="material-icons" aria-hidden="true">palette</span>
+              <span>Encontrar mi color ideal</span>
             </button>
+            <div class="cta-sub">Selector HSV + catálogo. Probalo en segundos →</div>
           </div>
 
-          <div class="card">
+          <div class="card calc">
             <div class="card-header">
-              <div class="icon-badge"><span class="material-icons" aria-hidden="true">calculate</span></div>
+              <div class="icon-badge"><span class="material-icons" aria-hidden="true">request_quote</span></div>
               <h2>Calculadora de Costos</h2>
             </div>
-            <p>Calculá costos reales (filamento, mano de obra, envío, IVA, ML) y exportá PDF.</p>
-            <button class="btn nav-btn" data-target="#frame-calc">
-              <span class="material-icons" aria-hidden="true">open_in_new</span> Abrir
+            <p>Calculá costos reales (filamento, mano de obra, envío, IVA y ML) y exportá tu PDF.</p>
+
+            <!-- CTA potente -->
+            <button class="nav-btn cta-btn" data-target="#frame-calc"
+                    aria-label="Abrir Calculadora y calcular mi presupuesto ahora">
+              <span class="material-icons" aria-hidden="true">request_quote</span>
+              <span>Calcular mi presupuesto ahora</span>
             </button>
+            <div class="cta-sub">Resultados claros y exportación inmediata en PDF</div>
           </div>
         </div>
       </div>
@@ -213,7 +242,7 @@
       const frame = frames[targetId];
       if (!frame) return;
 
-      // Carga perezosa
+      // Carga perezosa (una sola vez)
       if (!frame.dataset.loaded) {
         frame.src = frame.dataset.src;
         frame.dataset.loaded = 'true';
@@ -228,11 +257,11 @@
       frame.hidden = false;
       current = targetId;
 
-      // Actualizar botones activos
+      // Actualizar botones activos (header + hero)
       btns.forEach(b => setActive(b, b.dataset.target === targetId));
     }
 
-    // Click en cualquier .nav-btn abre el target (incluye botones del hero)
+    // Click en cualquier .nav-btn abre el target (incluye CTAs del hero)
     btns.forEach(b => b.addEventListener('click', () => show(b.dataset.target)));
 
     // Navegación con teclado entre las pestañas del header
