@@ -42,7 +42,529 @@
   </header>
 
   <main>
-    <!-- ========== Color Finder (Pega aquí TODO tu markup original) ========== -->
+   <style>
+    :root{ --bg:#0b0c0f; --card:#111317; --muted:#9aa1ac; --text:#e8ecf1; --accent:#3b82f6; --line:#1b1f28; }
+    *{ box-sizing:border-box }
+    body{ margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial, "Noto Sans", sans-serif; color:var(--text); background:linear-gradient(120deg,#0b0c0f,#0f1218); }
+
+    header{ padding:12px 20px; border-bottom:1px solid var(--line); position:sticky; top:0; background:#0b0c0fd9; backdrop-filter:saturate(140%) blur(6px); display:flex; gap:12px; align-items:center; z-index:10 }
+    header h1{ margin:0; font-size:16px; font-weight:600; letter-spacing:.2px; white-space:nowrap }
+
+    .app{ display:grid; grid-template-columns: 520px minmax(420px, 560px); gap:20px; padding:20px; max-width:1200px; margin:0 auto; align-items:start }
+
+    /* IZQUIERDA COMPACTA */
+    .left{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; position:relative }
+    .pickers{ display:grid; grid-template-columns: 44px 1fr; gap:16px; align-items:center }
+    .vbar-wrap{ display:flex; justify-content:center }
+    #vbar{ width:28px; height:300px; border-radius:10px; border:1px solid var(--line); cursor:ns-resize; display:block }
+    #wheel{ width:320px; height:320px; display:block; margin:0 auto; border-radius:12px; border:1px solid var(--line); cursor:crosshair }
+
+    .readout{ display:flex; gap:16px; align-items:center; margin:12px 2px 6px 2px; color:var(--muted) }
+    .dot{ width:10px; height:10px; border-radius:50%; background:#e53935; box-shadow:0 0 0 2px #2a2f3b inset }
+    .tag{ display:inline-flex; gap:8px; align-items:center }
+    .chip{ background:#141a25; border:1px solid var(--line); padding:8px 10px; border-radius:10px; color:#dbe6f7; font-size:14px; min-width:140px }
+
+    .img-preview{ width:100%; height:260px; border:1px solid var(--line); border-radius:12px; object-fit:cover; display:block; margin-top:10px }
+
+    /* DERECHA */
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px }
+    .filters{ position:relative; display:flex; gap:8px; align-items:center; margin-bottom:10px }
+    .select, .input{ appearance:none; border:1px solid #223047; background:#131824; color:#dbe6f7; border-radius:10px; padding:8px 12px; font-size:14px }
+    .input{ width:340px }
+    .suggestions{ position:absolute; top:44px; right:0; width:340px; max-height:320px; overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:6px; display:none; z-index:15 }
+    .sug-item{ display:grid; grid-template-columns: 20px 1fr auto; gap:10px; align-items:center; padding:8px; border-radius:8px; cursor:pointer }
+    .sug-item:hover{ background:#0f1218 }
+    .sug-dot{ width:20px; height:20px; border-radius:6px; border:1px solid var(--line) }
+    .sug-meta{ color:var(--muted); font-size:12px }
+    .sug-empty{ color:var(--muted); font-size:13px; padding:8px; text-align:center }
+
+    .main-swatch{ width:100%; height:120px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px }
+    .meta{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; color:var(--muted); font-size:14px }
+    .meta strong{ color:var(--text); font-weight:600 }
+    .actions{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap }
+    .btn{ appearance:none; border:1px solid #223047; background:#131824; color:#dbe6f7; padding:8px 12px; border-radius:10px; font-size:14px; cursor:pointer }
+    .btn:hover{ border-color:#2b3a55 }
+    .btn-cta{ background:#18a34a; border-color:#169344; color:white; font-weight:700 }
+    .btn-cta:hover{ filter:brightness(1.05) }
+
+    .subs{ display:grid; gap:10px; margin-top:16px }
+    .sub{ display:grid; grid-template-columns: 56px 1fr auto; gap:12px; align-items:center; border:1px solid var(--line); border-radius:12px; background:#0f1218; padding:10px }
+    .sub .sw{ width:56px; height:46px; border:1px solid var(--line); border-radius:10px }
+    .sub h3{ margin:0; font-size:15px }
+    .sub small{ color:var(--muted) }
+    .btn-mini{ padding:6px 10px; font-size:13px }
+
+    /* Lightbox producto */
+    .lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.82); display:none; align-items:center; justify-content:center; z-index:9999; opacity:0; transition:opacity .18s ease }
+    .lightbox.show{ display:flex; opacity:1 }
+    .lightbox img{ max-width:min(92vw,1200px); max-height:90vh; display:block; transform:scale(.98); transition:transform .18s ease }
+    .lightbox.show img{ transform:scale(1) }
+    .close{ position:absolute; top:12px; right:12px; padding:8px 10px; border:0; border-radius:8px; background:#fff; cursor:pointer; z-index:2 }
+
+    /* Modal eyedropper */
+    .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:9998; background:rgba(0,0,0,.82); opacity:0; transition:opacity .18s ease }
+    .modal.show{ display:flex; opacity:1 }
+    .modal-card{ background:#0f1218; border:1px solid var(--line); border-radius:12px; padding:12px; width:min(92vw, 980px) }
+    .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px }
+    .modal-head h3{ margin:0; font-size:16px }
+    #eyeCanvas{ width:100%; height:520px; border:1px solid var(--line); border-radius:10px; display:block; cursor:crosshair }
+    .pill{ background:#141a25; border:1px solid var(--line); padding:6px 10px; border-radius:8px; font-size:13px; color:#dbe6f7 }
+
+    input[type="file"]{ display:none }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Búsqueda por color</h1>
+  </header>
+
+  <main class="app">
+    <!-- IZQUIERDA (rueda + barra FINITA) -->
+    <section class="left">
+      <div class="pickers">
+        <div class="vbar-wrap">
+          <canvas id="vbar" width="28" height="300" aria-label="Luminosidad"></canvas>
+        </div>
+        <canvas id="wheel" width="320" height="320" aria-label="Rueda de color HSV"></canvas>
+      </div>
+
+      <div class="readout">
+        <span class="dot" id="dot"></span>
+        <span class="tag">RGB: <span id="sel-rgb" class="chip">—</span></span>
+        <span class="tag">HEX: <input id="sel-hex" class="chip" style="border:1px solid #2b3a55; outline:none; width:160px" value="" /></span>
+      </div>
+
+      <img id="preview-img" class="img-preview" alt="Vista previa del filamento" />
+    </section>
+
+    <!-- DERECHA -->
+    <section class="card" id="main-card" aria-live="polite">
+      <!-- FILTROS JUSTO ARRIBA DEL RECTÁNGULO -->
+      <div class="filters">
+        <select id="typeFilter" class="select" title="Filtrar por tipo">
+          <option value="*">Tipos de filamento ▾</option>
+          <option>PLA</option>
+          <option>PLA+</option>
+          <option>ABS</option>
+          <option>PETG</option>
+          <option>FLEX</option>
+          <option>PLAFLEX</option>
+        </select>
+        <input id="q" class="input" type="search" placeholder="Buscar por color, marca o #hex" autocomplete="off" />
+        <div id="sugs" class="suggestions" role="listbox" aria-label="Resultados"></div>
+      </div>
+
+      <div class="main-swatch" id="main-sw"></div>
+      <h2 id="main-name" style="margin:0 0 6px 0; font-size:20px">—</h2>
+
+      <div class="meta">
+        <div><strong>Marca:</strong> <span id="main-brand">—</span></div>
+        <div><strong>Tipo:</strong> <span id="main-type">—</span></div>
+        <div><strong>Estilo:</strong> <span id="main-style">—</span></div>
+        <div><strong>Temp.:</strong> <span id="main-temp">—</span></div>
+        <div><strong>Resist.:</strong> <span id="main-strength">—</span></div>
+        <div><strong>HEX:</strong> <span id="main-hex">—</span></div>
+      </div>
+
+      <!-- Acciones: CTA + Ideas + Imagen de referencia (al lado) -->
+      <div class="actions">
+        <a id="main-link" class="btn btn-cta" href="#" target="_blank" rel="noopener">¡Comprar ahora!</a>
+        <button id="ideas-btn" class="btn" type="button">Creador de Ideas</button>
+        <label class="btn" for="refImage">Usa una imagen de referencia</label>
+        <input id="refImage" type="file" accept="image/*" />
+      </div>
+
+      <div id="ideas-box" class="card" style="margin-top:12px; display:none">
+        <h3 style="margin:0 0 8px 0; font-size:16px">Ideas</h3>
+        <ul id="ideas-list" style="margin:0; padding-left:18px"></ul>
+      </div>
+
+      <article class="card" style="margin-top:14px">
+        <h2 style="margin:0 0 8px 0; font-size:18px">Otras sugerencias</h2>
+        <div class="subs">
+          <div class="sub" id="sub-1">
+            <div class="sw" id="sub1-sw"></div>
+            <div>
+              <h3 id="sub1-name">—</h3>
+              <small id="sub1-desc">—</small>
+            </div>
+            <button class="btn btn-mini" id="sub1-btn">Ver</button>
+          </div>
+          <div class="sub" id="sub-2">
+            <div class="sw" id="sub2-sw"></div>
+            <div>
+              <h3 id="sub2-name">—</h3>
+              <small id="sub2-desc">—</small>
+            </div>
+            <button class="btn btn-mini" id="sub2-btn">Ver</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- Lightbox producto -->
+  <div class="lightbox" id="lightbox">
+    <button class="close" id="lb-close">Cerrar</button>
+    <img id="lb-img" alt="Imagen del filamento" />
+  </div>
+
+  <!-- Modal eyedropper -->
+  <div class="modal" id="eyeModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Selecciona un color desde tu imagen</h3>
+        <div class="pill">Haz clic en la imagen para tomar el color exacto</div>
+      </div>
+      <canvas id="eyeCanvas" width="960" height="520"></canvas>
+      <div class="actions" style="margin-top:10px; justify-content:flex-end">
+        <button class="btn" id="eye-close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ====== CONFIG ====== */
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZ-GFIahnmzB09C1GWCvAs1PaNXmpN2_Ed5taWtseTRlqx0P8-ZKJ28TOsvziFOw/pub?output=tsv";
+
+    /* ====== HELPERS ====== */
+    const clamp = (n,a,b)=>Math.min(b,Math.max(a,n));
+    const norm = s => (s==null? '' : String(s).trim());
+    function normalizeHex(h){
+      if (typeof h !== 'string') return null;
+      const s = h.trim();
+      const r3=/^#?[0-9a-fA-F]{3}$/; const r6=/^#?[0-9a-fA-F]{6}$/;
+      if (r3.test(s)){ const p=s.replace('#',''); return '#'+p.split('').map(c=>c+c).join('').toLowerCase(); }
+      if (r6.test(s)){ return '#'+s.replace('#','').toLowerCase(); }
+      return null;
+    }
+    function hexToRgb(hex){ const h=hex.replace('#',''); return {r:parseInt(h.slice(0,2),16), g:parseInt(h.slice(2,4),16), b:parseInt(h.slice(4,6),16)} }
+    function rgbToHex(r,g,b){ return '#'+[r,g,b].map(v=>clamp(Math.round(v),0,255).toString(16).padStart(2,'0')).join('') }
+    function rgbFromHsv(h, s, v){
+      h = Number(h); s = Number(s); v = Number(v);
+      if (s === 0) { const vv=Math.round(v*255); return {r:vv, g:vv, b:vv}; }
+      let i=Math.floor(h*6); const f=h*6 - i; const p=v*(1-s); const q=v*(1-s*f); const t=v*(1-s*(1-f)); i%=6;
+      let r,g,b;
+      if (i===0){ r=v; g=t; b=p; }
+      else if(i===1){ r=q; g=v; b=p; }
+      else if(i===2){ r=p; g=v; b=t; }
+      else if(i===3){ r=p; g=q; b=v; }
+      else if(i===4){ r=t; g=p; b=v; }
+      else { r=v; g=p; b=q; }
+      return { r:Math.round(r*255), g:Math.round(g*255), b:Math.round(b*255) };
+    }
+    function colorDistance(a,b){ const dr=a.r-b.r, dg=a.g-b.g, db=a.b-b.b; return Math.sqrt(dr*dr+dg*dg+db*db); }
+
+    /* ====== STATE ====== */
+    const wheel = document.getElementById('wheel');
+    const wctx  = wheel.getContext('2d', { willReadFrequently:true });
+    const vbar  = document.getElementById('vbar');
+    const vctx  = vbar.getContext('2d');
+
+    const CX = wheel.width/2, CY=wheel.height/2, R=150;
+    let H = 0.0, S = 1.0, V = 1.0;
+    let draggingWheel = false;
+    let draggingV = false;
+
+    let items = [];
+    let pool  = [];
+    let lastRGB = null;
+
+    /* ====== DRAWERS ====== */
+    function drawWheel(){
+      const img = wctx.createImageData(wheel.width, wheel.height);
+      for(let y=0; y<wheel.height; y++){
+        for(let x=0; x<wheel.width; x++){
+          const dx=x-CX, dy=y-CY; const dist=Math.sqrt(dx*dx+dy*dy);
+          if (dist<=R){
+            let ang=Math.atan2(dy,dx); if(ang<0) ang+=Math.PI*2;
+            const hue=ang/(Math.PI*2), sat=dist/R;
+            const {r,g,b} = rgbFromHsv(hue, sat, V);
+            const i=(y*wheel.width + x)*4; img.data[i]=r; img.data[i+1]=g; img.data[i+2]=b; img.data[i+3]=255;
+          }
+        }
+      }
+      wctx.putImageData(img,0,0);
+    }
+    function drawVBar(){
+      const cTop = rgbFromHsv(H,S,1);
+      const grd = vctx.createLinearGradient(0,0,0,vbar.height);
+      grd.addColorStop(0, `rgb(${cTop.r},${cTop.g},${cTop.b})`);
+      grd.addColorStop(1, `rgb(0,0,0)`);
+      vctx.fillStyle=grd;
+      vctx.fillRect(0,0,vbar.width,vbar.height);
+      const y=(1-V)*vbar.height;
+      vctx.fillStyle="#ffffff";
+      vctx.fillRect(0, y-1, vbar.width, 2);
+    }
+
+    /* ====== IO ====== */
+    function updateFromWheel(clientX, clientY){
+      const r = wheel.getBoundingClientRect();
+      const sx = wheel.width / r.width, sy = wheel.height / r.height;
+      const x = (clientX - r.left)*sx, y=(clientY - r.top)*sy;
+      const dx=x-CX, dy=y-CY; const dist=Math.sqrt(dx*dx + dy*dy);
+      if (dist>R) return;
+      let ang=Math.atan2(dy,dx); if(ang<0) ang+=Math.PI*2;
+      H = ang/(Math.PI*2); S = dist/R;
+      const rgb = rgbFromHsv(H,S,V);
+      lastRGB = rgb;
+      reflectSelection(rgb);
+      drawWheel(); drawVBar();
+      rankAndRenderBy(rgb);
+    }
+    function updateFromVBar(clientY){
+      const r = vbar.getBoundingClientRect();
+      const sy = vbar.height / r.height;
+      const y  = (clientY - r.top)*sy;
+      V = clamp(1 - (y/vbar.height), 0, 1);
+      const rgb = rgbFromHsv(H,S,V);
+      lastRGB = rgb;
+      reflectSelection(rgb);
+      drawWheel(); drawVBar();
+      rankAndRenderBy(rgb);
+    }
+
+    wheel.addEventListener('mousedown', e=>{ draggingWheel=true; updateFromWheel(e.clientX,e.clientY); });
+    window.addEventListener('mousemove', e=>{ if(draggingWheel) updateFromWheel(e.clientX,e.clientY); });
+    window.addEventListener('mouseup', ()=> draggingWheel=false);
+
+    vbar.addEventListener('mousedown', e=>{ draggingV=true; updateFromVBar(e.clientY); });
+    window.addEventListener('mousemove', e=>{ if(draggingV) updateFromVBar(e.clientY); });
+    window.addEventListener('mouseup', ()=> draggingV=false);
+
+    /* ====== CARGA CATÁLOGO ====== */
+    async function cargar(){
+      const imgPrev = document.getElementById('preview-img');
+      try{
+        const res = await fetch(sheetUrl, {cache:'no-store', mode:'cors'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        let text = await res.text();
+        if(/<\s*html/i.test(text)) throw new Error('La URL devolvió HTML. Publica como TSV/CSV');
+        text = text.replace(/^\uFEFF/, '').replace(/\r\n/g,'\n');
+        const head = text.split('\n')[0]; const delim = head.includes('\t')? '\t' : ',';
+        const rows = text.trim().split('\n').map(l=>l.split(delim));
+        const headers = rows.shift().map(h=>h.replace(/^"(.*)"$/,'$1').toLowerCase().trim());
+        const ix = k => headers.indexOf(k);
+        const idx={
+          id: ix('id'),
+          name: headers.includes('name')? ix('name') : ix('nombre'),
+          hex: ix('hex'),
+          brand: headers.includes('brand')? ix('brand') : ix('marca'),
+          type: headers.includes('type')? ix('type') : ix('tipo'),
+          style: headers.includes('style')? ix('style') : ix('estilo'),
+          temp: headers.includes('temp')? ix('temp') : ix('temperatura'),
+          strength: headers.includes('strength')? ix('strength') : ix('resistencia'),
+          link: headers.includes('link')? ix('link') : ix('url'),
+          img: headers.includes('img')? ix('img') : (headers.includes('image')? ix('image'): -1),
+          ideas: headers.includes('ideas')? ix('ideas'): -1
+        };
+        if (idx.hex === -1) throw new Error('Falta columna HEX');
+        rows.forEach(r=>{
+          const hex = normalizeHex(r[idx.hex]||''); if(!hex) return;
+          const it = {
+            id: idx.id!==-1? norm(r[idx.id]) : '',
+            name: idx.name!==-1? norm(r[idx.name]) : '',
+            hex, rgb:hexToRgb(hex),
+            brand: idx.brand!==-1? norm(r[idx.brand]) : '',
+            type: idx.type!==-1? norm(r[idx.type]) : '',
+            style: idx.style!==-1? norm(r[idx.style]) : '',
+            temp: idx.temp!==-1? norm(r[idx.temp]) : '',
+            strength: idx.strength!==-1? norm(r[idx.strength]) : '',
+            link: idx.link!==-1? norm(r[idx.link]) : '#',
+            img: idx.img!==-1? norm(r[idx.img]) : '',
+            ideas: idx.ideas!==-1? norm(r[idx.ideas]) : ''
+          };
+          items.push(it);
+        });
+        pool = items.slice();
+
+        if (items[0]?.img){ imgPrev.src = items[0].img; imgPrev.alt = `Vista previa ${items[0].name}`; }
+      }catch(e){ console.error(e); }
+    }
+
+    /* ====== RENDERS ====== */
+    function reflectSelection(rgb){
+      const hex = rgbToHex(rgb.r,rgb.g,rgb.b);
+      document.getElementById('dot').style.background = hex;
+      document.getElementById('sel-rgb').textContent = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+      document.getElementById('sel-hex').value = hex;
+    }
+    function renderMainCard(a){
+      if(!a) return;
+      document.getElementById('main-sw').style.background = a.hex;
+      document.getElementById('main-name').textContent   = a.name || 'Sin nombre';
+      document.getElementById('main-brand').textContent  = a.brand || '-';
+      document.getElementById('main-type').textContent   = a.type || '-';
+      document.getElementById('main-style').textContent  = a.style || '-';
+      document.getElementById('main-temp').textContent   = a.temp || '-';
+      document.getElementById('main-strength').textContent = a.strength || '-';
+      document.getElementById('main-hex').textContent    = a.hex;
+      document.getElementById('main-link').href          = a.link || '#';
+
+      const prev = document.getElementById('preview-img');
+      if (a.img){
+        prev.src = a.img; prev.alt=`Vista previa ${a.name}`;
+        prev.onerror = ()=>{ prev.removeAttribute('src'); };
+        prev.onclick = ()=> openLightbox(a.img);
+      } else { prev.removeAttribute('src'); prev.onclick=null; }
+
+      // Ideas toggle
+      const ideasBtn = document.getElementById('ideas-btn');
+      const ideasBox = document.getElementById('ideas-box');
+      const ul = document.getElementById('ideas-list');
+      ideasBox.style.display='none'; ul.innerHTML='';
+      ideasBtn.onclick = ()=>{
+        ul.innerHTML='';
+        const ideas = (a.ideas||'').split(';').map(s=>s.trim()).filter(Boolean);
+        if (!ideas.length){ ul.innerHTML='<li style="color:var(--muted)">Sin ideas cargadas</li>'; }
+        else ideas.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
+        ideasBox.style.display='block';
+      };
+    }
+    function renderSide(top){
+      const [a,b,c] = top;
+      if(!a) return;
+      renderMainCard(a);
+      const setSub = (prefix, it) => {
+        const sw = document.getElementById(prefix+'-sw');
+        const nm = document.getElementById(prefix+'-name');
+        const ds = document.getElementById(prefix+'-desc');
+        const btn= document.getElementById(prefix+'-btn');
+        if (!it){ sw.style.background='transparent'; nm.textContent='—'; ds.textContent='—'; btn.onclick=null; return; }
+        sw.style.background = it.hex;
+        nm.textContent = it.name || 'Sin nombre';
+        ds.textContent = `${it.brand||'-'} · ${it.type||'-'} · ${it.style||'-'}`;
+        btn.onclick = ()=> { renderMainCard(it); if (it.img) openLightbox(it.img); };
+      };
+      setSub('sub1', b); setSub('sub2', c);
+    }
+    function rankAndRenderBy(rgb){
+      if (!pool.length) return;
+      const ranked = pool.map(it=>({it, d: colorDistance(rgb, it.rgb)})).sort((a,b)=>a.d-b.d).slice(0,3).map(x=>x.it);
+      renderSide(ranked);
+    }
+
+    /* ====== BUSCADOR + TIPO (dentro de la tarjeta) ====== */
+    const inputQ = document.getElementById('q');
+    const typeFilter = document.getElementById('typeFilter');
+    const sugsBox = document.getElementById('sugs');
+
+    function currentType(){
+      const v = (typeFilter.value||'*').trim().toUpperCase();
+      return v==='TIPOS DE FILAMENTO ▾' ? '*' : v;
+    }
+    function filterPoolByType(){
+      const t = currentType();
+      pool = (t==='*') ? items.slice() : items.filter(it => (it.type||'').toUpperCase()===t);
+    }
+    function applySearchAndSuggest(q){
+      filterPoolByType();
+      q = (q||'').trim().toLowerCase();
+      let list = pool;
+      if (q){
+        if (q.startsWith('#')){
+          const hx = normalizeHex(q) || '';
+          list = pool.filter(it => it.hex.startsWith(hx));
+        } else {
+          list = pool.filter(it =>
+            (it.name||'').toLowerCase().includes(q) ||
+            (it.brand||'').toLowerCase().includes(q)
+          );
+        }
+      }
+      renderSugs(list);
+      if (lastRGB) rankAndRenderBy(lastRGB);
+    }
+    function showSugs(){ sugsBox.style.display='block'; }
+    function hideSugs(){ sugsBox.style.display='none'; sugsBox.innerHTML=''; }
+    function renderSugs(list){
+      sugsBox.innerHTML='';
+      const LIM=100;
+      const out=list.slice(0,LIM);
+      if (!out.length){
+        const empty=document.createElement('div'); empty.className='sug-empty'; empty.textContent='Sin existencias';
+        sugsBox.appendChild(empty); showSugs(); return;
+      }
+      out.forEach(it=>{
+        const div=document.createElement('div'); div.className='sug-item';
+        const dot=document.createElement('span'); dot.className='sug-dot'; dot.style.background=it.hex;
+        const text=document.createElement('div'); text.innerHTML=`<strong>${it.name||'(Sin nombre)'}</strong><div class="sug-meta">${it.brand||'-'} · ${it.hex}</div>`;
+        const go=document.createElement('div'); go.textContent='ver'; go.style.fontSize='12px'; go.style.color='var(--accent)';
+        div.appendChild(dot); div.appendChild(text); div.appendChild(go);
+        div.onclick=()=>{ hideSugs(); inputQ.value = it.name || it.hex; lastRGB = it.rgb;
+          document.getElementById('sel-rgb').textContent = `${it.rgb.r}, ${it.rgb.g}, ${it.rgb.b}`;
+          document.getElementById('sel-hex').value = it.hex;
+          rankAndRenderBy(it.rgb);
+        };
+        sugsBox.appendChild(div);
+      });
+      showSugs();
+    }
+    inputQ.addEventListener('input', e=> applySearchAndSuggest(e.target.value));
+    inputQ.addEventListener('focus', ()=>{ if(inputQ.value) applySearchAndSuggest(inputQ.value); });
+    document.addEventListener('click', e=>{ if(!sugsBox.contains(e.target) && e.target!==inputQ) hideSugs(); });
+    typeFilter.addEventListener('change', ()=> applySearchAndSuggest(inputQ.value));
+
+    /* ====== LIGHTBOX ====== */
+    const lb = document.getElementById('lightbox');
+    function openLightbox(src){ const img=document.getElementById('lb-img'); img.src=src; lb.classList.add('show'); }
+    function closeLightbox(){ lb.classList.remove('show'); const img=document.getElementById('lb-img'); img.removeAttribute('src'); }
+    document.getElementById('lb-close').addEventListener('click', closeLightbox);
+    lb.addEventListener('click', e=>{ if(e.target.id==='lightbox') closeLightbox(); });
+    window.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeLightbox(); closeEye(); } });
+
+    /* ====== HEX EDITABLE ====== */
+    document.getElementById('sel-hex').addEventListener('change', e=>{
+      const hx = normalizeHex(e.target.value);
+      if (!hx) return;
+      const rgb = hexToRgb(hx);
+      lastRGB = rgb; reflectSelection(rgb); rankAndRenderBy(rgb);
+    });
+
+    /* ====== EYEDROPPER EN MODAL ====== */
+    const eyeModal = document.getElementById('eyeModal');
+    const eyeCanvas= document.getElementById('eyeCanvas');
+    const ectx = eyeCanvas.getContext('2d', { willReadFrequently:true });
+    function openEye(img){
+      ectx.clearRect(0,0,eyeCanvas.width,eyeCanvas.height);
+      const iw = img.naturalWidth, ih = img.naturalHeight;
+      const cw = eyeCanvas.width, ch=eyeCanvas.height;
+      const s = Math.min(cw/iw, ch/ih);
+      const w = Math.round(iw*s), h=Math.round(ih*s);
+      const x = Math.round((cw - w)/2), y=Math.round((ch - h)/2);
+      ectx.drawImage(img, 0,0,iw,ih, x,y,w,h);
+      eyeModal.classList.add('show');
+    }
+    function closeEye(){ eyeModal.classList.remove('show'); }
+    eyeCanvas.addEventListener('click', e=>{
+      const r = eyeCanvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - r.left) * (eyeCanvas.width / r.width));
+      const y = Math.floor((e.clientY - r.top)  * (eyeCanvas.height/ r.height));
+      const px = ectx.getImageData(x,y,1,1).data;
+      const rgb = { r:px[0], g:px[1], b:px[2] };
+      lastRGB = rgb; reflectSelection(rgb); rankAndRenderBy(rgb); closeEye();
+    });
+    document.getElementById('eye-close').addEventListener('click', closeEye);
+    document.getElementById('refImage').addEventListener('change', e=>{
+      const f = e.target.files?.[0]; if(!f) return;
+      const img = new Image();
+      img.onload = ()=> openEye(img);
+      img.src = URL.createObjectURL(f);
+      e.target.value = '';
+    });
+
+    /* ====== INIT ====== */
+    function startDefault(){
+      H=0; S=1; V=1; drawWheel(); drawVBar();
+      const rgb = rgbFromHsv(H,S,V); lastRGB=rgb; reflectSelection(rgb);
+    }
+    startDefault();
+    window.addEventListener('DOMContentLoaded', async ()=>{
+      await cargar();
+      rankAndRenderBy(lastRGB || rgbFromHsv(H,S,V));
+    });
+  </script>
     <section id="color-app" role="tabpanel" aria-labelledby="tab-color">
       <!--
         SUGERIDO: conserva estos IDs si tu JS los usa (ajusta si no existen en tu HTML original):
@@ -56,7 +578,1647 @@
       -->
     </section>
 
-    <!-- ========== Calculadora de Costos (Pega aquí TODO tu markup original) ========== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    :root {
+      --primary-bg: #121212;
+      --secondary-bg: #1e1e1e;
+      --card-bg: #1e1e1e;
+      --section-bg: #252525;
+      --text-primary: #ffffff;
+      --text-secondary: #bbbbbb;
+      --accent-color: #4CAF50;
+      --error-color: #f44336;
+      --primary-color: #1976D2;
+      --secondary-color: #FF6F00;
+      --toggle-active: #64B5F6;
+      --text-important: #FFD54F;
+      --text-info: #ffffff;
+      --text-warning: #FFCA28;
+      --text-success: #66BB6A;
+      --border-color: #333;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background-color: var(--primary-bg);
+      background-image: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: var(--text-primary);
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(30, 30, 46, 0.8);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    header h1 {
+      font-weight: 500;
+      font-size: 2.2rem;
+      color: var(--text-important);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    
+    .card {
+      background: rgba(30, 30, 46, 0.8);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      margin-bottom: 25px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+    }
+    
+    .tabs {
+      display: flex;
+      background: var(--section-bg);
+      overflow-x: auto;
+      padding: 0 10px;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .tab {
+      padding: 15px 25px;
+      cursor: pointer;
+      font-weight: 500;
+      position: relative;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    
+    .tab:hover {
+      background: rgba(25, 118, 210, 0.2);
+    }
+    
+    .tab.active {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    .tab.active:after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--text-success);
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 25px;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--primary-color);
+    }
+    
+    .section-header h3 {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: var(--text-info);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--text-secondary);
+      font-weight: 400;
+      font-size: 0.95rem;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 14px;
+      background: rgba(37, 37, 37, 0.5);
+      border: none;
+      border-bottom: 2px solid var(--primary-color);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border-radius: 4px;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-bottom: 2px solid var(--text-success);
+      background: rgba(37, 37, 37, 0.7);
+    }
+    
+    .helper-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      display: block;
+      font-style: italic;
+      background-color: rgba(85, 85, 85, 0.5);
+      padding: 5px 8px;
+      border-radius: 4px;
+    }
+    
+    .switch-container {
+      display: flex;
+      align-items: center;
+      padding: 14px;
+      background: var(--section-bg);
+      border-radius: 8px;
+      margin: 20px 0;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .switch-container.active {
+      background: rgba(25, 118, 210, 0.2);
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      margin-right: 15px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #555;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--primary-color);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    .optional-fields {
+      padding: 20px;
+      margin-top: 20px;
+      background: rgba(37, 37, 37, 0.5);
+      border-radius: 8px;
+      animation: fadeIn 0.5s ease-out;
+      display: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .btn {
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    
+    .btn-primary {
+      background: var(--primary-color);
+      background: linear-gradient(135deg, var(--primary-color), #0d47a1);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: var(--secondary-color);
+      background: linear-gradient(135deg, var(--secondary-color), #e65100);
+      color: white;
+    }
+    
+    .btn-accent {
+      background: var(--accent-color);
+      background: linear-gradient(135deg, var(--accent-color), #2e7d32);
+      color: white;
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 10px rgba(0,0,0,0.3);
+    }
+    
+    .result-highlight {
+      background: rgba(66, 133, 244, 0.15);
+      padding: 25px;
+      border-radius: 10px;
+      margin: 30px 0;
+      border-left: 4px solid var(--text-success);
+      text-align: center;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .result-highlight .value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: var(--text-success);
+      margin: 15px 0;
+      text-shadow: 0 0 10px rgba(102, 187, 106, 0.5);
+    }
+    
+    .export-buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      gap: 20px;
+    }
+    
+    .export-btn {
+      padding: 15px 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      gap: 10px;
+      background: linear-gradient(135deg, #b71c1c, #7f0000);
+      color: white;
+      font-size: 1rem;
+    }
+    
+    .export-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 10px rgba(0,0,0,0.3);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .note {
+      margin: 30px 0;
+      padding: 20px;
+      background: var(--section-bg);
+      border-radius: 8px;
+      text-align: center;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .progress-container {
+      margin: 25px 0;
+      background: var(--section-bg);
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      width: 25%;
+      transition: width 0.5s ease;
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .tab {
+        justify-content: center;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .export-buttons {
+        flex-direction: column;
+      }
+      
+      .export-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 25px 0;
+      background: rgba(37, 37, 37, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .summary-table th, 
+    .summary-table td {
+      padding: 15px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .summary-table th {
+      background: var(--primary-color);
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    
+    .summary-table tr:last-child td {
+      font-weight: bold;
+      border-bottom: none;
+      background: rgba(102, 187, 106, 0.1);
+    }
+    
+    .summary-table tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .summary-table td:last-child {
+      text-align: right;
+    }
+    
+    .text-success {
+      color: var(--text-success);
+    }
+    
+    .text-warning {
+      color: var(--text-warning);
+    }
+    
+    .text-important {
+      color: var(--text-important);
+    }
+    
+    .sub-section {
+      margin-top: 15px;
+      padding-left: 20px;
+      border-left: 2px solid var(--primary-color);
+    }
+    
+    .summary-sub {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px;
+      background: var(--section-bg);
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .summary-sub span {
+      font-weight: bold;
+    }
+    
+    .alert {
+      padding: 15px;
+      background-color: #f44336;
+      color: white;
+      border-radius: 8px;
+      margin: 15px 0;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    input.error, select.error {
+      border-color: var(--error-color) !important;
+    }
+    
+    .required-field::after {
+      content: " *";
+      color: var(--error-color);
+    }
+    
+    .success-message {
+      padding: 15px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 8px;
+      margin: 15px 0;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>
+        <i class="material-icons">calculate</i>
+        Calculadora de Costos Hoho 3D
+      </h1>
+      <p class="subtitle">Calcula el costo real de tus impresiones 3D con todos los factores incluidos</p>
+    </header>
+    
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-tab="basic">
+          <i class="material-icons">settings</i>
+          Configuración Básica
+        </div>
+        <div class="tab" data-tab="printing">
+          <i class="material-icons">print</i>
+          Impresión
+        </div>
+        <div class="tab" data-tab="shipping">
+          <i class="material-icons">local_shipping</i>
+          Envío
+        </div>
+        <div class="tab" data-tab="results">
+          <i class="material-icons">payments</i>
+          Resultados
+        </div>
+      </div>
+      
+      <!-- Pestaña: Configuración Básica -->
+      <div class="tab-content active" id="basic-tab">
+        <div class="section-header">
+          <h3><i class="material-icons">local_fire_department</i> Filamento e Impresora</h3>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="tipoFilamento" class="required-field">Tipo de filamento</label>
+            <input id="tipoFilamento" name="tipoFilamento" type="text" class="form-control" required>
+            <span class="helper-text">Ejemplo: PLA, ABS, PETG</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="costoFilamento" class="required-field">Costo filamento por kilo (ARS)</label>
+            <input id="costoFilamento" type="number" min="0" step="any" class="form-control" required>
+            <span class="helper-text">Ejemplo: 4000 (para un rollo de 1kg)</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="nombreImpresora" class="required-field">¿Qué impresora usás?</label>
+            <input id="nombreImpresora" type="text" class="form-control" required>
+            <span class="helper-text">Ejemplo: Ender 3, Prusa i3</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="costoImpresora" class="required-field">Costo impresora (ARS)</label>
+            <input id="costoImpresora" type="number" min="0" step="any" class="form-control" required>
+            <span class="helper-text">Precio actual de tu impresora</span>
+          </div>
+        </div>
+        
+        <div class="switch-container" id="advancedConfigContainer">
+          <div class="switch">
+            <input type="checkbox" id="toggleAdvancedConfig">
+            <span class="slider"></span>
+          </div>
+          <span>Configuración Avanzada</span>
+        </div>
+        
+        <div id="advancedConfigFields" class="optional-fields">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="impresionesAnio">Impresiones estimadas/año</label>
+              <input id="impresionesAnio" type="number" min="1" step="any" class="form-control" value="50">
+              <span class="helper-text">Cantidad aproximada de impresiones anuales</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="depreciacionImpresora">Depreciación impresora/año (%)</label>
+              <input id="depreciacionImpresora" type="number" min="1" max="100" class="form-control" value="10">
+              <span class="helper-text">Porcentaje que pierde valor tu impresora</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="switch-container" id="fixedCostsContainer">
+          <div class="switch">
+            <input type="checkbox" id="toggleFixedCosts">
+            <span class="slider"></span>
+          </div>
+          <span>Costos Fijos</span>
+        </div>
+        
+        <div id="fixedCostsFields" class="optional-fields">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="costoEnergia">Costo energético KW/h (ARS)</label>
+              <input id="costoEnergia" type="number" min="0" step="any" class="form-control" value="120">
+              <span class="helper-text">Precio actual de la electricidad</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="consumoImpresora">Consumo impresora (Watts/h)</label>
+              <input id="consumoImpresora" type="number" min="0" step="any" class="form-control" value="150">
+              <span class="helper-text">Consumo de tu impresora en Watts</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="switch-container" id="pcContainer">
+          <div class="switch">
+            <input type="checkbox" id="togglePC">
+            <span class="slider"></span>
+          </div>
+          <span>Incluir Costos de Computadora</span>
+        </div>
+        
+        <div id="pcFields" class="optional-fields">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="costoPC">Costo equipo de cómputo (ARS)</label>
+              <input id="costoPC" type="number" min="0" step="any" class="form-control" value="150000">
+              <span class="helper-text">Valor de tu computadora</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="horasPC">Horas uso PC por impresión</label>
+              <input id="horasPC" type="number" min="0" step="any" class="form-control" value="0.5">
+              <span class="helper-text">Tiempo que usas la PC para preparar</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="switch-container" id="rentaContainer">
+          <div class="switch">
+            <input type="checkbox" id="toggleRenta">
+            <span class="slider"></span>
+          </div>
+          <span>Incluir Renta</span>
+        </div>
+        
+        <div id="rentaFields" class="optional-fields">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="renta">¿Pagás renta? (ARS)</label>
+              <input id="renta" type="number" min="0" step="any" class="form-control" value="20000">
+              <span class="helper-text">Costo mensual de alquiler</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="switch-container" id="consumiblesContainer">
+          <div class="switch">
+            <input type="checkbox" id="toggleConsumibles">
+            <span class="slider"></span>
+          </div>
+          <span>Incluir Consumibles</span>
+        </div>
+        
+        <div id="consumiblesFields" class="optional-fields">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="alcohol">Alcohol isopropílico (ARS)</label>
+              <input id="alcohol" type="number" min="0" step="any" class="form-control" value="1500">
+              <span class="helper-text">Costo por botella</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="adherente">Adherente cama impresión (ARS)</label>
+              <input id="adherente" type="number" min="0" step="any" class="form-control" value="800">
+              <span class="helper-text">Ejemplo: laca, pegamento</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="camaMagnetica">Cama magnética (ARS)</label>
+              <input id="camaMagnetica" type="number" min="0" step="any" class="form-control" value="4000">
+              <span class="helper-text">Costo de reposición</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="memoriaSD">Memoria SD/MicroSD (ARS)</label>
+              <input id="memoriaSD" type="number" min="0" step="any" class="form-control" value="1500">
+              <span class="helper-text">Costo de la memoria</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="otrosConsumibles">Otros consumibles (ARS)</label>
+              <input id="otrosConsumibles" type="number" min="0" step="any" class="form-control" value="1000">
+              <span class="helper-text">Cualquier otro material</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="degradacionConsumibles">% Degradación consumibles</label>
+              <input id="degradacionConsumibles" type="number" min="0" max="100" class="form-control" value="0.5">
+              <span class="helper-text">% que se gasta por impresión</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary" disabled>
+            <i class="material-icons">navigate_before</i> Anterior
+          </button>
+          <button type="button" class="btn btn-primary next-tab" data-next="printing">
+            Siguiente <i class="material-icons">navigate_next</i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Pestaña: Impresión -->
+      <div class="tab-content" id="printing-tab">
+        <div class="section-header">
+          <h3><i class="material-icons">print</i> Detalles de Impresión</h3>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="gramosFilamento">Filamento consumido (g)</label>
+            <input id="gramosFilamento" type="number" min="0" step="any" class="form-control" value="150">
+            <span class="helper-text">Gramos que usará la impresión</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="horasImpresion">Horas de impresión</label>
+            <input id="horasImpresion" type="number" min="0" step="any" class="form-control" value="5">
+            <span class="helper-text">Tiempo estimado de impresión</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="factorError">Factor de error de impresión</label>
+            <input id="factorError" type="number" min="1" step="any" class="form-control" value="1.2">
+            <span class="helper-text">1.2 si sueles tener fallas</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="sueldoHora">Sueldo por hora (ARS)</label>
+            <input id="sueldoHora" type="number" min="0" step="any" class="form-control" value="1500">
+            <span class="helper-text">Lo que vale tu tiempo</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="gananciaHora">Ganancia por hora (ARS)</label>
+            <input id="gananciaHora" type="number" min="0" step="any" class="form-control" value="500">
+            <span class="helper-text">Beneficio que quieres obtener</span>
+          </div>
+        </div>
+        
+        <div class="switch-container" id="postProcessContainer">
+          <div class="switch">
+            <input type="checkbox" id="togglePostProcess">
+            <span class="slider"></span>
+          </div>
+          <span>Incluir Postprocesado</span>
+        </div>
+        
+        <div id="postProcessFields" class="optional-fields">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="horasPostproc">Horas de postprocesado</label>
+              <input id="horasPostproc" type="number" min="0" step="any" class="form-control" value="2">
+              <span class="helper-text">Tiempo de trabajo manual</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="costoPegamento">Costo del pegamento (ARS)</label>
+              <input id="costoPegamento" type="number" min="0" step="any" class="form-control" value="200">
+              <span class="helper-text">Para unir piezas</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="sueldoHoraPostproc">Sueldo postproc. (ARS/h)</label>
+              <input id="sueldoHoraPostproc" type="number" min="0" step="any" class="form-control" value="1000">
+              <span class="helper-text">Valor de tu tiempo en postproceso</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="otrosPostproc">Otros costos (ARS)</label>
+              <input id="otrosPostproc" type="number" min="0" step="any" class="form-control" value="100">
+              <span class="helper-text">Materiales adicionales</span>
+            </div>
+          </div>
+          
+          <div class="switch-container" id="lijadoContainer">
+            <div class="switch">
+              <input type="checkbox" id="toggleLijado">
+              <span class="slider"></span>
+            </div>
+            <span>Incluir Lijado</span>
+          </div>
+          
+          <div id="lijadoFields" class="optional-fields sub-section">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="tipoLijado">Tipo de lijado</label>
+                <select id="tipoLijado" class="form-control">
+                  <option value="" disabled selected>Elige una opción</option>
+                  <option value="manual">Manual</option>
+                  <option value="lijadora" selected>Lijadora</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="costoLijadora">Costo lijadora (ARS)</label>
+                <input id="costoLijadora" type="number" min="0" step="any" class="form-control" value="5000">
+                <span class="helper-text">Si usas lijadora eléctrica</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="cantidadLijas">Cantidad de lijas</label>
+                <input id="cantidadLijas" type="number" min="0" step="1" class="form-control" value="2">
+                <span class="helper-text">Lijas usadas por pieza</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="costoLija">Costo por lija (ARS)</label>
+                <input id="costoLija" type="number" min="0" step="any" class="form-control" value="150">
+                <span class="helper-text">Costo unitario</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="switch-container" id="paintContainer">
+            <div class="switch">
+              <input type="checkbox" id="togglePaint">
+              <span class="slider"></span>
+            </div>
+            <span>Incluir Pintura</span>
+          </div>
+          
+          <div id="paintFields" class="optional-fields sub-section">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="horasPintura">Horas de pintura</label>
+                <input id="horasPintura" type="number" min="0" step="any" class="form-control" value="1.5">
+                <span class="helper-text">Tiempo estimado</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="compresorPropio">¿Compresor propio?</label>
+                <select id="compresorPropio" class="form-control">
+                  <option value="" disabled selected>Elige una opción</option>
+                  <option value="si" selected>Sí</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="costoCompresor">Costo compresor (ARS)</label>
+                <input id="costoCompresor" type="number" min="0" step="any" class="form-control" value="15000">
+                <span class="helper-text">Si no es propio, poner 0</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="costoAerografo">Costo aerógrafo (ARS)</label>
+                <input id="costoAerografo" type="number" min="0" step="any" class="form-control" value="8000">
+                <span class="helper-text">Costo del equipo</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="costoPrimer">Pintura primaria/primer (ARS)</label>
+                <input id="costoPrimer" type="number" min="0" step="any" class="form-control" value="1200">
+                <span class="helper-text">Costo de la pintura base</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="costoPintura">Pintura final (ARS)</label>
+                <input id="costoPintura" type="number" min="0" step="any" class="form-control" value="1800">
+                <span class="helper-text">Costo de la pintura color</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="costoDiluyente">Diluyente (ARS)</label>
+                <input id="costoDiluyente" type="number" min="0" step="any" class="form-control" value="700">
+                <span class="helper-text">Para limpieza de herramientas</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="sueldoHoraPintura">Sueldo pintura (ARS/h)</label>
+                <input id="sueldoHoraPintura" type="number" min="0" step="any" class="form-control" value="1500">
+                <span class="helper-text">Valor de tu tiempo pintando</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="otrosPintura">Otros costos (ARS)</label>
+                <input id="otrosPintura" type="number" min="0" step="any" class="form-control" value="300">
+                <span class="helper-text">Materiales adicionales</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary prev-tab" data-prev="basic">
+            <i class="material-icons">navigate_before</i> Anterior
+          </button>
+          <button type="button" class="btn btn-primary next-tab" data-next="shipping">
+            Siguiente <i class="material-icons">navigate_next</i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Pestaña: Envío -->
+      <div class="tab-content" id="shipping-tab">
+        <div class="switch-container" id="empaqueContainer">
+          <div class="switch">
+            <input type="checkbox" id="toggleEmpaque">
+            <span class="slider"></span>
+          </div>
+          <span>Incluir Costos de Empaque</span>
+        </div>
+        
+        <div id="empaqueFields" class="optional-fields">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="empaque">Costo material empaque (ARS)</label>
+              <input id="empaque" type="number" min="0" step="any" class="form-control" value="500">
+              <span class="helper-text">Cajas, burbujas, etc.</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="switch-container" id="shippingConfigContainer">
+          <div class="switch">
+            <input type="checkbox" id="toggleShippingConfig">
+            <span class="slider"></span>
+          </div>
+          <span>Incluir detalles de envío</span>
+        </div>
+        
+        <div id="shippingConfigFields" class="optional-fields">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="paqueteria">Paquetería nacional</label>
+              <select id="paqueteria" class="form-control">
+                <option value="" disabled selected>Elige una opción</option>
+                <option value="correo" selected>Correo Argentino</option>
+                <option value="andreani">Andreani</option>
+                <option value="viaCargo">Vía Cargo</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="pesoPaquete">Peso total paquete (kg)</label>
+              <input id="pesoPaquete" type="number" min="0" step="any" class="form-control" value="0.5">
+              <span class="helper-text">Peso estimado con empaque</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="envioNacional">Costo envío nacional (ARS)</label>
+              <input id="envioNacional" type="number" min="0" step="any" class="form-control" value="2500">
+              <span class="helper-text">Se calcula automáticamente o ingresa manualmente</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-header">
+          <h3><i class="material-icons">gavel</i> Impuestos y Comisiones</h3>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="iva">Porcentaje de impuestos (IVA)</label>
+            <input id="iva" type="number" min="0" max="100" step="any" class="form-control" value="21">
+            <span class="helper-text">21% es el valor estándar</span>
+          </div>
+          
+          <div class="form-group">
+            <div class="switch-container" id="mercadoLibreContainer">
+              <div class="switch">
+                <input type="checkbox" id="mercadoLibre" checked>
+                <span class="slider"></span>
+              </div>
+              <span>Incluir recargo Mercado Libre (10%)</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary prev-tab" data-prev="printing">
+            <i class="material-icons">navigate_before</i> Anterior
+          </button>
+          <button type="button" class="btn btn-primary next-tab" data-next="results">
+            Siguiente <i class="material-icons">navigate_next</i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Pestaña: Resultados -->
+      <div class="tab-content" id="results-tab">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="nombreCliente">Nombre del cliente (opcional)</label>
+            <input id="nombreCliente" type="text" class="form-control" placeholder="Ej: Juan Pérez">
+            <span class="helper-text">Para incluir en el presupuesto PDF</span>
+          </div>
+        </div>
+        
+        <div class="alert" id="calculationAlert">
+          <i class="material-icons">error</i>
+          <span>Por favor completa los campos requeridos en las pestañas anteriores</span>
+        </div>
+        
+        <div class="success-message" id="calculationSuccess">
+          <i class="material-icons">check_circle</i>
+          <span>Cálculo completado exitosamente</span>
+        </div>
+        
+        <div class="summary-sub">
+          <div>Ganancia total por horas impresión:</div>
+          <div id="gananciaTotalPreview" class="text-warning">—</div>
+        </div>
+        
+        <div class="summary-sub">
+          <div>Sueldo total por horas trabajo:</div>
+          <div id="sueldoTotalPreview" class="text-warning">—</div>
+        </div>
+        
+        <div class="result-highlight">
+          <div class="text-important">Total Final Recomendado</div>
+          <div id="totalFinalValue" class="value">—</div>
+          <div class="text-info">Este es el precio que deberías cobrar por tu impresión</div>
+        </div>
+        
+        <div class="summary-table">
+          <table id="summaryTable">
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Monto (ARS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Depreciación impresora</td>
+                <td id="depImpresoraCell">—</td>
+              </tr>
+              <tr>
+                <td>Depreciación PC</td>
+                <td id="depPCCell">—</td>
+              </tr>
+              <tr>
+                <td>Filamento utilizado</td>
+                <td id="filamentoCell">—</td>
+              </tr>
+              <tr>
+                <td>Electricidad impresora</td>
+                <td id="electricidadCell">—</td>
+              </tr>
+              <tr>
+                <td>Electricidad PC</td>
+                <td id="electricidadPCCell">—</td>
+              </tr>
+              <tr>
+                <td>Renta (proporcional)</td>
+                <td id="rentaCell">—</td>
+              </tr>
+              <tr>
+                <td>Consumibles (proporcional)</td>
+                <td id="consumiblesCell">—</td>
+              </tr>
+              <tr>
+                <td>Mano de obra impresión</td>
+                <td id="manoObraCell">—</td>
+              </tr>
+              <tr>
+                <td>Postprocesado</td>
+                <td id="postprocCell">—</td>
+              </tr>
+              <tr>
+                <td>Pintura</td>
+                <td id="pinturaCell">—</td>
+              </tr>
+              <tr>
+                <td>Envío y empaque</td>
+                <td id="envioCell">—</td>
+              </tr>
+              <tr>
+                <td><b>Recargo Mercado Libre</b></td>
+                <td id="mlCell" class="text-warning"><b>—</b></td>
+              </tr>
+              <tr>
+                <td><b>IVA (21%)</b></td>
+                <td id="ivaCell" class="text-warning"><b>—</b></td>
+              </tr>
+              <tr>
+                <td><b>TOTAL FINAL</b></td>
+                <td id="totalFinalCell" class="text-success"><b>—</b></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="export-buttons">
+          <div class="export-btn" id="exportPDFBtn">
+            <i class="material-icons">picture_as_pdf</i> Exportar a PDF
+          </div>
+        </div>
+        
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary prev-tab" data-prev="shipping">
+            <i class="material-icons">navigate_before</i> Anterior
+          </button>
+          <button type="button" class="btn btn-accent" id="restartBtn">
+            <i class="material-icons">restart_alt</i> Nuevo Cálculo
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="note">
+      <i class="material-icons">info_outline</i> Todos los montos son aproximados y de referencia. Esta calculadora te ayuda a estimar costos reales para tu negocio de impresión 3D.
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let totalFinal = 0;
+      let isCalculating = false;
+
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      // Tab switching
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.dataset.tab;
+          switchTab(tabId);
+        });
+      });
+
+      // Navigation buttons
+      document.querySelectorAll('.next-tab').forEach(button => {
+        button.addEventListener('click', () => {
+          const nextTab = button.dataset.next;
+          if (validateTab(getCurrentTab())) {
+            switchTab(nextTab);
+          }
+        });
+      });
+
+      document.querySelectorAll('.prev-tab').forEach(button => {
+        button.addEventListener('click', () => {
+          const prevTab = button.dataset.prev;
+          switchTab(prevTab);
+        });
+      });
+
+      // Setup optional sections
+      setupOptionalSections();
+
+      // Restart button
+      document.getElementById('restartBtn').addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que deseas reiniciar la calculadora? Se perderán todos los datos.')) {
+          resetCalculator();
+        }
+      });
+
+      // Export PDF
+      document.getElementById('exportPDFBtn').addEventListener('click', exportToPDF);
+
+      // Shipping cost calculation
+      ['paqueteria', 'pesoPaquete'].forEach(id => {
+        document.getElementById(id).addEventListener('change', calculateShippingCost);
+      });
+
+      // Real-time calculation
+      document.querySelectorAll('input, select').forEach(input => {
+        input.addEventListener('input', () => {
+          if (input.id !== 'nombreCliente' && document.querySelector('.tab[data-tab="results"]').classList.contains('active')) {
+            calculateSummary();
+          }
+        });
+      });
+
+      // Initialize
+      updateProgressBar('basic');
+
+      function switchTab(tabId) {
+        tabs.forEach(t => t.classList.remove('active'));
+        document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+        tabContents.forEach(tc => tc.classList.remove('active'));
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+        updateProgressBar(tabId);
+        if (tabId === 'results') {
+          calculateSummary();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function getCurrentTab() {
+        return document.querySelector('.tab.active').dataset.tab;
+      }
+
+      function validateTab(currentTab) {
+        // Solo validamos los campos obligatorios en la pestaña básica
+        const requiredFieldsByTab = {
+          basic: ['tipoFilamento', 'costoFilamento', 'nombreImpresora', 'costoImpresora'],
+          printing: [],
+          shipping: [],
+          results: []
+        };
+
+        const requiredFields = requiredFieldsByTab[currentTab] || [];
+        let missingFields = [];
+
+        requiredFields.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el.value || (el.type === 'number' && parseFloat(el.value) <= 0)) {
+            missingFields.push(el.labels[0].textContent);
+            el.classList.add('error');
+          } else {
+            el.classList.remove('error');
+          }
+        });
+
+        if (missingFields.length > 0) {
+          showAlert(`Por favor completa los campos requeridos: ${missingFields.join(', ')}`);
+          return false;
+        }
+        hideAlert();
+        return true;
+      }
+
+      function showAlert(message) {
+        const alert = document.getElementById('calculationAlert');
+        alert.querySelector('span').textContent = message;
+        alert.style.display = 'flex';
+        document.getElementById('calculationSuccess').style.display = 'none';
+      }
+
+      function hideAlert() {
+        document.getElementById('calculationAlert').style.display = 'none';
+      }
+
+      function showSuccess() {
+        document.getElementById('calculationSuccess').style.display = 'flex';
+        document.getElementById('calculationAlert').style.display = 'none';
+      }
+
+      function calculateShippingCost() {
+        if (!document.getElementById('toggleShippingConfig').checked) return;
+
+        const paqueteria = document.getElementById('paqueteria').value;
+        const peso = parseFloat(document.getElementById('pesoPaquete').value) || 1;
+        let envio = 0;
+
+        if (paqueteria === 'correo') envio = peso * 2500;
+        else if (paqueteria === 'andreani') envio = peso * 3000;
+        else if (paqueteria === 'viaCargo') envio = peso * 2000;
+        else if (paqueteria === 'otro') envio = parseFloat(document.getElementById('envioNacional').value) || 0;
+
+        document.getElementById('envioNacional').value = envio.toFixed(2);
+        if (document.querySelector('.tab[data-tab="results"]').classList.contains('active')) {
+          calculateSummary();
+        }
+      }
+
+      function setupOptionalSections() {
+        const sections = [
+          { toggle: 'toggleAdvancedConfig', container: 'advancedConfigContainer', section: 'advancedConfigFields' },
+          { toggle: 'toggleFixedCosts', container: 'fixedCostsContainer', section: 'fixedCostsFields' },
+          { toggle: 'togglePC', container: 'pcContainer', section: 'pcFields' },
+          { toggle: 'toggleRenta', container: 'rentaContainer', section: 'rentaFields' },
+          { toggle: 'toggleConsumibles', container: 'consumiblesContainer', section: 'consumiblesFields' },
+          { toggle: 'togglePostProcess', container: 'postProcessContainer', section: 'postProcessFields' },
+          { toggle: 'toggleLijado', container: 'lijadoContainer', section: 'lijadoFields' },
+          { toggle: 'togglePaint', container: 'paintContainer', section: 'paintFields' },
+          { toggle: 'toggleEmpaque', container: 'empaqueContainer', section: 'empaqueFields' },
+          { toggle: 'toggleShippingConfig', container: 'shippingConfigContainer', section: 'shippingConfigFields' },
+          { toggle: 'mercadoLibre', container: 'mercadoLibreContainer', section: null }
+        ];
+
+        sections.forEach(({ toggle, container, section }) => {
+          const toggleEl = document.getElementById(toggle);
+          const containerEl = document.getElementById(container);
+          const sectionEl = section ? document.getElementById(section) : null;
+
+          if (toggleEl && containerEl) {
+            toggleEl.addEventListener('change', () => {
+              containerEl.classList.toggle('active', toggleEl.checked);
+              if (sectionEl) sectionEl.style.display = toggleEl.checked ? 'block' : 'none';
+              if (document.querySelector('.tab[data-tab="results"]').classList.contains('active')) {
+                calculateSummary();
+              }
+            });
+
+            containerEl.addEventListener('click', e => {
+              if (e.target !== toggleEl) {
+                toggleEl.checked = !toggleEl.checked;
+                toggleEl.dispatchEvent(new Event('change'));
+              }
+            });
+          }
+        });
+      }
+
+      function updateProgressBar(tabId) {
+        const progressMap = { basic: 25, printing: 50, shipping: 75, results: 100 };
+        document.getElementById('progressBar').style.width = `${progressMap[tabId]}%`;
+      }
+
+      function calculateSummary() {
+        if (isCalculating) return;
+        isCalculating = true;
+        hideAlert();
+
+        try {
+          // Validar solo campos básicos necesarios
+          const requiredBasicFields = ['tipoFilamento', 'costoFilamento', 'nombreImpresora', 'costoImpresora'];
+          let missingFields = [];
+          
+          requiredBasicFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el.value || (el.type === 'number' && parseFloat(el.value) <= 0)) {
+              missingFields.push(el.labels[0].textContent);
+              el.classList.add('error');
+            } else {
+              el.classList.remove('error');
+            }
+          });
+
+          if (missingFields.length > 0) {
+            showAlert(`Por favor completa los campos requeridos: ${missingFields.join(', ')}`);
+            isCalculating = false;
+            return;
+          }
+
+          const getValue = id => {
+            const el = document.getElementById(id);
+            if (!el.value || isNaN(parseFloat(el.value))) return 0;
+            return parseFloat(el.value);
+          };
+          
+          const costoFilamento = getValue('costoFilamento');
+          const gramosFilamento = getValue('gramosFilamento') || 0;
+          const factorError = getValue('factorError') || 1.2;
+          const gramosFilamentoUsado = gramosFilamento * factorError;
+          const costoFilamentoUtilizado = (costoFilamento / 1000) * gramosFilamentoUsado;
+
+          let costoElectrico = 0;
+          if (document.getElementById('toggleFixedCosts').checked) {
+            const costoEnergia = getValue('costoEnergia');
+            const consumoImpresora = getValue('consumoImpresora');
+            const horasImpresion = getValue('horasImpresion') || 0;
+            const consumoKW = (consumoImpresora * horasImpresion) / 1000;
+            costoElectrico = consumoKW * costoEnergia;
+          }
+
+          let costoElectricoPC = 0;
+          if (document.getElementById('togglePC').checked) {
+            const horasPC = getValue('horasPC') || 0;
+            const costoEnergia = getValue('costoEnergia') || 0;
+            const consumoKWpc = (horasPC * 100) / 1000;
+            costoElectricoPC = consumoKWpc * costoEnergia;
+          }
+
+          let depImpresora = 0;
+          let depPC = 0;
+          if (document.getElementById('toggleAdvancedConfig').checked) {
+            const costoImpresora = getValue('costoImpresora');
+            const impresionesAnio = getValue('impresionesAnio') || 1;
+            const depreciacionImpresora = getValue('depreciacionImpresora') || 10;
+            depImpresora = (costoImpresora * (depreciacionImpresora / 100)) / impresionesAnio;
+
+            if (document.getElementById('togglePC').checked) {
+              const costoPC = getValue('costoPC') || 0;
+              depPC = (costoPC * 0.1) / impresionesAnio;
+            }
+          }
+
+          let costoRenta = 0;
+          if (document.getElementById('toggleRenta').checked) {
+            const renta = getValue('renta') || 0;
+            const impresionesAnio = getValue('impresionesAnio') || 12;
+            costoRenta = renta / impresionesAnio;
+          }
+
+          let totalConsumibles = 0;
+          if (document.getElementById('toggleConsumibles').checked) {
+            const alcohol = getValue('alcohol') || 0;
+            const adherente = getValue('adherente') || 0;
+            const camaMagnetica = getValue('camaMagnetica') || 0;
+            const memoriaSD = getValue('memoriaSD') || 0;
+            const otrosConsumibles = getValue('otrosConsumibles') || 0;
+            const degradacionConsumibles = getValue('degradacionConsumibles') || 1;
+            totalConsumibles = (alcohol + adherente + camaMagnetica + memoriaSD + otrosConsumibles) * (degradacionConsumibles / 100);
+          }
+
+          const sueldoHora = getValue('sueldoHora') || 0;
+          const gananciaHora = getValue('gananciaHora') || 0;
+          const horasImpresion = getValue('horasImpresion') || 0;
+          const manoObraImpresion = (sueldoHora + gananciaHora) * horasImpresion;
+
+          document.getElementById('gananciaTotalPreview').textContent = formatCurrency(gananciaHora * horasImpresion);
+          document.getElementById('sueldoTotalPreview').textContent = formatCurrency(sueldoHora * horasImpresion);
+
+          let costoPostproc = 0;
+          if (document.getElementById('togglePostProcess').checked) {
+            const horasPostproc = getValue('horasPostproc') || 0;
+            const costoPegamento = getValue('costoPegamento') || 0;
+            const sueldoHoraPostproc = getValue('sueldoHoraPostproc') || 0;
+            const otrosPostproc = getValue('otrosPostproc') || 0;
+
+            let lijas = 0;
+            if (document.getElementById('toggleLijado').checked) {
+              const cantidadLijas = getValue('cantidadLijas') || 0;
+              const costoLija = getValue('costoLija') || 0;
+              lijas = cantidadLijas * costoLija;
+            }
+
+            let costoLijadora = 0;
+            if (document.getElementById('toggleLijado').checked && document.getElementById('tipoLijado').value === 'lijadora') {
+              costoLijadora = (getValue('costoLijadora') || 0) / 1000;
+            }
+
+            costoPostproc = costoPegamento + lijas + costoLijadora + (sueldoHoraPostproc * horasPostproc) + otrosPostproc;
+          }
+
+          let costoPinturaTotal = 0;
+          if (document.getElementById('togglePaint').checked) {
+            const horasPintura = getValue('horasPintura') || 0;
+            const sueldoHoraPintura = getValue('sueldoHoraPintura') || 0;
+            const costoPrimer = getValue('costoPrimer') || 0;
+            const costoPintura = getValue('costoPintura') || 0;
+            const costoDiluyente = getValue('costoDiluyente') || 0;
+            const otrosPintura = getValue('otrosPintura') || 0;
+
+            let costoCompresor = 0;
+            let costoAerografo = 0;
+            if (document.getElementById('compresorPropio').value === 'si') {
+              costoCompresor = (getValue('costoCompresor') || 0) / 1000;
+              costoAerografo = (getValue('costoAerografo') || 0) / 1000;
+            }
+
+            costoPinturaTotal = costoCompresor + costoAerografo + costoPrimer + costoPintura + costoDiluyente + (sueldoHoraPintura * horasPintura) + otrosPintura;
+          }
+
+          let costoEnvioTotal = 0;
+          if (document.getElementById('toggleEmpaque').checked) {
+            costoEnvioTotal += getValue('empaque') || 0;
+          }
+          if (document.getElementById('toggleShippingConfig').checked) {
+            costoEnvioTotal += getValue('envioNacional') || 0;
+          }
+
+          const iva = getValue('iva') || 21;
+          const mercadoLibre = document.getElementById('mercadoLibre').checked;
+
+          const subtotal =
+            depImpresora + depPC + costoFilamentoUtilizado + costoElectrico + costoElectricoPC +
+            costoRenta + totalConsumibles + manoObraImpresion + costoPostproc + costoPinturaTotal + costoEnvioTotal;
+
+          const recargoML = mercadoLibre ? subtotal * 0.10 : 0;
+          const subtotalML = subtotal + recargoML;
+          const valorIVA = subtotalML * (iva / 100);
+          totalFinal = subtotalML + valorIVA;
+
+          document.getElementById('totalFinalValue').textContent = formatCurrency(totalFinal);
+          document.getElementById('depImpresoraCell').textContent = formatCurrency(depImpresora);
+          document.getElementById('depPCCell').textContent = formatCurrency(depPC);
+          document.getElementById('filamentoCell').textContent = formatCurrency(costoFilamentoUtilizado);
+          document.getElementById('electricidadCell').textContent = formatCurrency(costoElectrico);
+          document.getElementById('electricidadPCCell').textContent = formatCurrency(costoElectricoPC);
+          document.getElementById('rentaCell').textContent = formatCurrency(costoRenta);
+          document.getElementById('consumiblesCell').textContent = formatCurrency(totalConsumibles);
+          document.getElementById('manoObraCell').textContent = formatCurrency(manoObraImpresion);
+          document.getElementById('postprocCell').textContent = formatCurrency(costoPostproc);
+          document.getElementById('pinturaCell').textContent = formatCurrency(costoPinturaTotal);
+          document.getElementById('envioCell').textContent = formatCurrency(costoEnvioTotal);
+          document.getElementById('mlCell').innerHTML = `<b>${formatCurrency(recargoML)}</b>`;
+          document.getElementById('ivaCell').innerHTML = `<b>${formatCurrency(valorIVA)}</b>`;
+          document.getElementById('totalFinalCell').innerHTML = `<b>${formatCurrency(totalFinal)}</b>`;
+          
+          showSuccess();
+        } catch (error) {
+          console.error('Error en cálculo:', error);
+          showAlert('Error en el cálculo. Revisa los valores ingresados.');
+        } finally {
+          isCalculating = false;
+        }
+      }
+
+      function formatCurrency(amount) {
+        if (isNaN(amount) || amount === null || amount === undefined) {
+          return '$0';
+        }
+        return amount.toLocaleString('es-AR', {
+          style: 'currency',
+          currency: 'ARS',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
+      }
+
+      function resetCalculator() {
+        document.querySelectorAll('input, select').forEach(input => {
+          if (input.type === 'checkbox') {
+            input.checked = false;
+          } else if (input.type === 'number' || input.type === 'text') {
+            input.value = '';
+          } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0;
+          }
+        });
+
+        // Restaurar valores por defecto
+        document.getElementById('tipoFilamento').value = '';
+        document.getElementById('costoFilamento').value = '';
+        document.getElementById('nombreImpresora').value = '';
+        document.getElementById('costoImpresora').value = '';
+        document.getElementById('factorError').value = '1.2';
+        document.getElementById('iva').value = '21';
+        
+        document.querySelectorAll('.optional-fields').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.switch-container').forEach(el => el.classList.remove('active'));
+        switchTab('basic');
+        document.getElementById('totalFinalValue').textContent = '—';
+        document.querySelectorAll('#summaryTable td').forEach(td => td.textContent = '—');
+        document.getElementById('gananciaTotalPreview').textContent = '—';
+        document.getElementById('sueldoTotalPreview').textContent = '—';
+        hideAlert();
+        document.getElementById('calculationSuccess').style.display = 'none';
+      }
+
+      function exportToPDF() {
+        try {
+          if (!totalFinal || totalFinal === '—') {
+            alert('Por favor completa los cálculos antes de exportar a PDF.');
+            return;
+          }
+
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+
+          doc.setFontSize(20);
+          doc.setFont("helvetica", "bold");
+          doc.text('Presupuesto de Impresión 3D', 105, 20, { align: 'center' });
+
+          const now = new Date();
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "normal");
+          doc.text(`Generado el: ${now.toLocaleDateString('es-AR')}`, 105, 28, { align: 'center' });
+
+          const nombreCliente = document.getElementById('nombreCliente').value;
+          let y = 40;
+          if (nombreCliente) {
+            doc.setFontSize(12);
+            doc.text(`Cliente: ${nombreCliente}`, 20, y);
+            y += 10;
+          }
+
+          const filamento = document.getElementById('tipoFilamento').value || 'No especificado';
+          const impresora = document.getElementById('nombreImpresora').value || 'No especificada';
+          doc.setFontSize(12);
+          doc.text(`Tipo de filamento: ${filamento}`, 20, y);
+          y += 10;
+          doc.text(`Impresora utilizada: ${impresora}`, 20, y);
+          y += 10;
+
+          doc.setFontSize(14);
+          doc.setFont("helvetica", "bold");
+          doc.text('Resumen del Presupuesto', 105, y, { align: 'center' });
+          y += 10;
+
+          const tableColumn = ["Concepto", "Monto (ARS)"];
+          const tableRows = [];
+          document.querySelectorAll('#summaryTable tbody tr').forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length === 2) {
+              tableRows.push([cells[0].textContent, cells[1].textContent]);
+            }
+          });
+
+          doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: y,
+            theme: 'grid',
+            headStyles: {
+              fillColor: [25, 118, 210],
+              textColor: [255, 255, 255],
+              fontStyle: 'bold'
+            },
+            styles: {
+              fontSize: 10,
+              cellPadding: 3
+            },
+            columnStyles: {
+              1: { cellWidth: 40, halign: 'right' }
+            },
+            didDrawCell: data => {
+              if (data.row.index === tableRows.length - 1) {
+                doc.setFillColor(102, 187, 106);
+                doc.setTextColor(255, 255, 255);
+              }
+            }
+          });
+
+          doc.save('presupuesto_impresion3d.pdf');
+          alert('El presupuesto se ha exportado correctamente a PDF. La descarga iniciará en unos instantes.');
+        } catch (error) {
+          console.error('Error al exportar PDF:', error);
+          alert('Error al exportar el PDF. Por favor intenta de nuevo.');
+        }
+      }
+    });
+  </script>
     <section id="calc-app" role="tabpanel" aria-labelledby="tab-calc" hidden>
       <!-- Mantén tus clases/IDs. Asegúrate de que el botón de exportación tenga id="exportPDFBtn"
            y las celdas de salida (ejemplo): #filamentoCell, #manoObraCell, #mlCell, #ivaCell, #totalFinalCell
