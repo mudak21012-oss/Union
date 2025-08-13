@@ -14,12 +14,11 @@
   <style>
     :root{
       --bg:#0b0f16;
-      --panel:#0f1420;
       --line:#1d2837;
       --text:#e8ecf1;
       --muted:#9aa1ac;
-      --accent:#7aa2ff;            /* azul */
-      --accent-2:#00ffd0;          /* verde-agua */
+
+      /* Gradientes base */
       --btn-grad: linear-gradient(135deg,#2b3a55 0%, #1c2536 30%, #213a74 60%, #2a62ff 100%);
       --btn-grad-hover: linear-gradient(135deg,#334762 0%, #223049 30%, #244386 60%, #4f8cff 100%);
       --card-grad: radial-gradient(1200px 600px at 100% -10%, #1d2640 0%, transparent 40%),
@@ -35,7 +34,7 @@
       color:var(--text); background: radial-gradient(80vw 60vh at 20% -10%, #132133 0%, transparent 60%), var(--bg);
     }
 
-    /* ===== Header (Inicio | Título | Tabs) ===== */
+    /* ===== Header ===== */
     .app-header{
       position:sticky; top:0; z-index:10; display:grid; grid-template-columns:auto 1fr auto; align-items:center;
       gap:12px; padding:12px 16px; border-bottom:1px solid var(--line);
@@ -50,7 +49,7 @@
     }
     .home-btn{
       display:inline-flex; align-items:center; gap:8px;
-      padding:8px 12px; border-radius:10px; border:1px solid var(--line);
+      padding:10px 14px; border-radius:12px; border:1px solid var(--line);
       background:linear-gradient(180deg,#121824,#0e1420); color:var(--text); text-decoration:none;
       box-shadow:var(--shadow);
     }
@@ -66,7 +65,6 @@
     }
     .nav-btn .material-icons{ font-size:18px; line-height:0 }
     .nav-btn:hover{ background: var(--btn-grad-hover); transform: translateY(-1px); filter:saturate(115%) }
-    .nav-btn:active{ transform: translateY(0) scale(.99) }
     .nav-btn.is-active{ outline:none; box-shadow: var(--focus), var(--shadow); border-color:transparent }
     .nav-btn:focus{ outline:none; box-shadow: var(--focus), var(--shadow) }
 
@@ -75,63 +73,92 @@
     iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#0c1016; }
     [hidden]{ display:none !important; }
 
-    /* ===== Hero con tarjetas estéticas ===== */
+    /* ===== Hero ===== */
     .hero{ display:grid; place-items:center; height:100%; padding:24px }
     .hero-inner{ width:min(1100px, 94vw); display:grid; gap:22px }
     .hero-title{
-      margin:6px 0 2px 0; text-align:center; font-size: clamp(24px, 4.5vw, 42px); font-weight:900; letter-spacing:1px;
+      margin:6px 0 2px 0; text-align:center; font-size: clamp(28px, 5.2vw, 56px); font-weight:900; letter-spacing:1px;
       background: linear-gradient(90deg, #9ae6ff 0%, #7aa2ff 30%, #00ffd0 60%, #9ae6ff 100%);
       -webkit-background-clip:text; background-clip:text; color:transparent;
       text-shadow: 0 8px 52px rgba(0,0,0,.45);
     }
-    .cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:22px }
+    .cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:24px }
     .card{
-      border:1px solid var(--line); background: var(--card-grad); border-radius:16px; padding:20px;
-      display:grid; gap:12px; box-shadow: var(--shadow); position:relative; overflow:hidden;
+      border:1px solid var(--line); background: var(--card-grad); border-radius:20px; padding:24px;
+      display:grid; gap:14px; box-shadow: var(--shadow); position:relative; overflow:hidden;
     }
     .card::after{
-      content:""; position:absolute; inset:-1px; border-radius:16px;
+      content:""; position:absolute; inset:-1px; border-radius:20px;
       background: linear-gradient(120deg, rgba(122,162,255,.15), transparent 30%, rgba(0,255,208,.12) 60%, transparent 85%);
       mask:linear-gradient(#000,transparent 60%); pointer-events:none;
     }
-    .card-header{ display:flex; align-items:center; gap:12px }
+    .card-header{ display:flex; align-items:center; gap:14px }
     .icon-badge{
-      width:44px; height:44px; border-radius:12px; display:grid; place-items:center;
+      width:52px; height:52px; border-radius:14px; display:grid; place-items:center;
       background: linear-gradient(135deg, #142036, #203258);
       border:1px solid #22324a; color:#bcd3ff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
     }
-    .card h2{ margin:0; font-size:20px }
-    .card p{ margin:0; color:var(--muted); font-size:14px; line-height:1.45 }
+    .card h2{ margin:0; font-size:22px }
+    .card p{ margin:0; color:var(--muted); font-size:15px; line-height:1.5 }
 
-    /* ==== CTAs mejoradas (hero) ==== */
+    /* ===== CTAs XXL (más grandes, gruesos y llamativos) ===== */
+    .cta-row{ display:flex; align-items:center }
     .card .cta-btn{
-      border:1px solid transparent;
-      background: linear-gradient(135deg,#27324a 0%, #263252 25%, #2a4b9b 60%, #3866ff 100%);
-      color:#fff; padding:12px 16px; border-radius:14px;
-      display:inline-flex; align-items:center; gap:10px;
-      font-weight:700; letter-spacing:.2px; cursor:pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
-      position:relative; overflow:hidden; transition: transform .15s ease, filter .2s ease, box-shadow .2s ease;
+      /* tamaño */
+      padding:18px 26px;
+      font-size:17px;
+      font-weight:900;
+      letter-spacing:.25px;
+      border-radius:999px;
+      min-width:min(100%, 520px);
+      display:inline-flex; align-items:center; gap:12px; justify-content:center;
+
+      /* look */
+      border:0;
+      background: linear-gradient(135deg,#27324a 0%, #2b3a6e 35%, #3453c8 70%, #4f75ff 100%);
+      color:#fff;
+      box-shadow:
+        0 18px 40px rgba(0,0,0,.55),
+        0 4px 0 rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.10);
+
+      cursor:pointer;
+      position:relative;
+      transition: transform .12s ease, filter .2s ease, box-shadow .2s ease;
     }
-    .card .cta-btn .material-icons{ font-size:18px; opacity:.95 }
-    .card .cta-btn:hover{ transform: translateY(-1px); filter:saturate(120%); box-shadow: 0 14px 28px rgba(0,0,0,.45), 0 0 0 3px rgba(122,162,255,.18) }
+    .card .cta-btn .material-icons{ font-size:22px; opacity:.95 }
+    .card .cta-btn:hover{
+      transform: translateY(-2px);
+      filter:saturate(120%);
+      box-shadow:
+        0 22px 46px rgba(0,0,0,.6),
+        0 0 0 4px rgba(122,162,255,.18),
+        inset 0 1px 0 rgba(255,255,255,.12);
+    }
     .card .cta-btn:active{ transform: translateY(0) scale(.99) }
-    .card .cta-btn:focus{ outline:none; box-shadow: 0 0 0 3px rgba(122,162,255,.35), 0 10px 24px rgba(0,0,0,.35) }
+    .card .cta-btn:focus{ outline:none; box-shadow: 0 0 0 4px rgba(122,162,255,.30), 0 22px 46px rgba(0,0,0,.6) }
+
+    /* Brillo diagonal */
     .card .cta-btn::after{
-      content:""; position:absolute; top:-120%; left:-30%; width:60%; height:340%;
+      content:""; position:absolute; top:-140%; left:-30%; width:60%; height:360%;
       transform:rotate(28deg); pointer-events:none; opacity:0;
-      background: linear-gradient( to right, transparent 0%, rgba(255,255,255,.22) 48%, transparent 100% );
+      background: linear-gradient( to right, transparent 0%, rgba(255,255,255,.26) 48%, transparent 100% );
       transition: opacity .35s ease, transform .8s ease;
     }
-    .card .cta-btn:hover::after{ opacity:.8; transform: translateX(220%) rotate(28deg) }
-    .card .cta-sub{ margin-top:6px; color:#bcd; font-size:12px; opacity:.9 }
+    .card .cta-btn:hover::after{ opacity:.9; transform: translateX(240%) rotate(28deg) }
 
-    /* Variante de color para Calculadora (money vibe) */
+    /* Subcopy */
+    .card .cta-sub{ margin-top:8px; color:#c7d2fe; font-size:13px; opacity:.95 }
+
+    /* Variante verde-agua para la Calculadora */
     .card.calc .cta-btn{
-      background: linear-gradient(135deg,#274a40 0%, #225b57 30%, #1f7f7a 60%, #00c9aa 100%);
+      background: linear-gradient(135deg,#1d604f 0%, #147f78 35%, #07a89c 70%, #00d6ba 100%);
     }
     .card.calc .cta-btn:hover{
-      box-shadow: 0 14px 28px rgba(0,0,0,.45), 0 0 0 3px rgba(0,255,208,.20);
+      box-shadow:
+        0 22px 46px rgba(0,0,0,.6),
+        0 0 0 4px rgba(0,255,208,.20),
+        inset 0 1px 0 rgba(255,255,255,.12);
     }
 
     @media (max-width: 620px){
@@ -141,8 +168,13 @@
       .brand-title{ grid-area:title; text-align:left }
       .home-btn{ grid-area:home; justify-self:start }
       .app-nav{ grid-area:nav; justify-self:end }
+      .card .cta-btn{ min-width:100%; }
     }
-    @media (prefers-reduced-motion: reduce){ *{ transition:none !important } }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important }
+      .card .cta-btn::after{ display:none }
+    }
   </style>
 </head>
 <body>
@@ -170,11 +202,12 @@
   </header>
 
   <main>
-    <!-- Vista de bienvenida (se oculta al abrir una herramienta) -->
+    <!-- Vista de bienvenida -->
     <div id="hero" class="hero" aria-hidden="false">
       <div class="hero-inner">
         <div class="hero-title">HOHO – HERRAMIENTAS</div>
         <div class="cards">
+          <!-- Card: Color Finder -->
           <div class="card">
             <div class="card-header">
               <div class="icon-badge"><span class="material-icons" aria-hidden="true">palette</span></div>
@@ -182,15 +215,17 @@
             </div>
             <p>Explorá el catálogo por color, con sugerencias, ideas y visor de imágenes.</p>
 
-            <!-- CTA potente -->
-            <button class="nav-btn cta-btn" data-target="#frame-color"
-                    aria-label="Abrir Color Finder y encontrar mi color ideal">
-              <span class="material-icons" aria-hidden="true">palette</span>
-              <span>Encontrar mi color ideal</span>
-            </button>
+            <div class="cta-row">
+              <button class="nav-btn cta-btn" data-target="#frame-color"
+                      aria-label="Abrir Color Finder y encontrar mi color ideal">
+                <span class="material-icons" aria-hidden="true">palette</span>
+                <span>Encontrar mi color ideal</span>
+              </button>
+            </div>
             <div class="cta-sub">Selector HSV + catálogo. Probalo en segundos →</div>
           </div>
 
+          <!-- Card: Calculadora -->
           <div class="card calc">
             <div class="card-header">
               <div class="icon-badge"><span class="material-icons" aria-hidden="true">request_quote</span></div>
@@ -198,21 +233,21 @@
             </div>
             <p>Calculá costos reales (filamento, mano de obra, envío, IVA y ML) y exportá tu PDF.</p>
 
-            <!-- CTA potente -->
-            <button class="nav-btn cta-btn" data-target="#frame-calc"
-                    aria-label="Abrir Calculadora y calcular mi presupuesto ahora">
-              <span class="material-icons" aria-hidden="true">request_quote</span>
-              <span>Calcular mi presupuesto ahora</span>
-            </button>
+            <div class="cta-row">
+              <button class="nav-btn cta-btn" data-target="#frame-calc"
+                      aria-label="Abrir Calculadora y calcular mi presupuesto ahora">
+                <span class="material-icons" aria-hidden="true">request_quote</span>
+                <span>Calcular mi presupuesto ahora</span>
+              </button>
+            </div>
             <div class="cta-sub">Resultados claros y exportación inmediata en PDF</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Contenedor de iframes (una herramienta visible a la vez) -->
+    <!-- Iframes (una herramienta visible a la vez) -->
     <div class="frame-wrap">
-      <!-- Ajustá data-src si tus rutas son otras -->
       <iframe id="frame-color" title="Color Finder" hidden
               sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-top-navigation-by-user-activation"
               data-src="./color/index.html"></iframe>
@@ -228,56 +263,4 @@
       '#frame-color': document.getElementById('frame-color'),
       '#frame-calc' : document.getElementById('frame-calc'),
     };
-    const hero = document.getElementById('hero');
-    const btns = Array.from(document.querySelectorAll('.nav-btn'));
-    let current = null;
-
-    function setActive(btn, active){
-      btn.classList.toggle('is-active', !!active);
-      btn.setAttribute('aria-selected', active ? 'true' : 'false');
-      btn.setAttribute('tabindex', active ? '0' : '-1');
-    }
-
-    function show(targetId){
-      const frame = frames[targetId];
-      if (!frame) return;
-
-      // Carga perezosa (una sola vez)
-      if (!frame.dataset.loaded) {
-        frame.src = frame.dataset.src;
-        frame.dataset.loaded = 'true';
-      }
-
-      // Ocultar héroe y otros iframes
-      hero.setAttribute('aria-hidden','true');
-      hero.hidden = true;
-      Object.values(frames).forEach(f => f.hidden = true);
-
-      // Mostrar destino
-      frame.hidden = false;
-      current = targetId;
-
-      // Actualizar botones activos (header + hero)
-      btns.forEach(b => setActive(b, b.dataset.target === targetId));
-    }
-
-    // Click en cualquier .nav-btn abre el target (incluye CTAs del hero)
-    btns.forEach(b => b.addEventListener('click', () => show(b.dataset.target)));
-
-    // Navegación con teclado entre las pestañas del header
-    document.querySelector('.app-nav').addEventListener('keydown', (e)=>{
-      const headerBtns = btns.filter(b => b.closest('.app-nav'));
-      const idx = headerBtns.findIndex(b=>b.classList.contains('is-active'));
-      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const delta = e.key === 'ArrowRight' ? 1 : -1;
-        const next = (Math.max(0, idx) + delta + headerBtns.length) % headerBtns.length;
-        headerBtns[next].focus(); headerBtns[next].click();
-      }
-    });
-
-    // Si querés abrir una por defecto al cargar, descomentá:
-    // show('#frame-color');
-  </script>
-</body>
-</html>
+    const hero = document.getEl
