@@ -2,82 +2,188 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Hoho3D · Herramientas</title>
+  <title>HOHO – HERRAMIENTAS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Roboto + Material Icons (estética simple) -->
+  <!-- Roboto + Material Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <style>
-    :root{ --bg:#0b0c0f; --text:#e8ecf1; --muted:#a6adbb; --line:#1b1f28; --accent:#4f8cff; }
+    :root{
+      --bg:#0b0f16;
+      --panel:#0f1420;
+      --line:#1d2837;
+      --text:#e8ecf1;
+      --muted:#9aa1ac;
+      --accent:#7aa2ff;            /* azul */
+      --accent-2:#00ffd0;          /* verde-agua */
+      --btn-grad: linear-gradient(135deg,#2b3a55 0%, #1c2536 30%, #213a74 60%, #2a62ff 100%);
+      --btn-grad-hover: linear-gradient(135deg,#334762 0%, #223049 30%, #244386 60%, #4f8cff 100%);
+      --card-grad: radial-gradient(1200px 600px at 100% -10%, #1d2640 0%, transparent 40%),
+                   radial-gradient(1200px 600px at -10% 120%, #14323a 0%, transparent 40%),
+                   linear-gradient(180deg, #0f1522, #0b1018);
+      --shadow: 0 12px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);
+      --glass: rgba(255,255,255,.06);
+      --focus: 0 0 0 3px rgba(122,162,255,.35);
+    }
     *{ box-sizing:border-box }
     html, body { height:100% }
-    body{ margin:0; font-family:Roboto, system-ui, -apple-system, Segoe UI, Arial, "Noto Sans", sans-serif; color:var(--text); background:#0c1016;}
-    .app-header{ position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:12px; padding:12px 16px;
-      border-bottom:1px solid var(--line); background:#0c1016ea; backdrop-filter:saturate(140%) blur(6px);}
-    .app-header h1{ margin:0; font-size:16px; font-weight:600; letter-spacing:.2px }
-    .app-nav{ margin-left:auto; display:flex; gap:8px }
+    body{
+      margin:0; font-family:Roboto, system-ui, -apple-system, Segoe UI, Arial, "Noto Sans", sans-serif;
+      color:var(--text); background: radial-gradient(80vw 60vh at 20% -10%, #132133 0%, transparent 60%), var(--bg);
+    }
+
+    /* ===== Header (3 columnas: Inicio | Título | Tabs) ===== */
+    .app-header{
+      position:sticky; top:0; z-index:10; display:grid; grid-template-columns:auto 1fr auto; align-items:center;
+      gap:12px; padding:12px 16px; border-bottom:1px solid var(--line);
+      background:rgba(11,15,22,.85); backdrop-filter:saturate(140%) blur(6px);
+    }
+    .brand-title{
+      text-align:center; margin:0; line-height:1;
+      font-size: clamp(18px, 2.4vw, 28px); font-weight:900; letter-spacing:.8px;
+      background: linear-gradient(90deg, #7aa2ff 0%, #9ae6ff 35%, #00ffd0 70%, #7aa2ff 100%);
+      -webkit-background-clip: text; background-clip:text; color:transparent;
+      text-shadow: 0 0 18px rgba(0,255,208,.08);
+    }
+    .home-btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:10px; border:1px solid var(--line);
+      background:linear-gradient(180deg,#121824,#0e1420); color:var(--text); text-decoration:none;
+      box-shadow:var(--shadow);
+    }
+    .home-btn .material-icons{ font-size:18px }
+    .home-btn:hover{ border-color:#2a3a55 }
+    .home-btn:focus{ outline:none; box-shadow: var(--focus) }
+
+    .app-nav{ display:flex; gap:8px }
     .nav-btn{
-      border:1px solid var(--line); background:#12151d; color:var(--text);
-      padding:8px 12px; border-radius:10px; cursor:pointer; font-size:14px; display:inline-flex; align-items:center; gap:6px;
+      border:1px solid var(--line); color:var(--text); cursor:pointer; font-size:14px;
+      padding:10px 14px; border-radius:12px; display:inline-flex; align-items:center; gap:8px;
+      background: var(--btn-grad); box-shadow: var(--shadow); transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
     }
     .nav-btn .material-icons{ font-size:18px; line-height:0 }
-    .nav-btn.is-active{ border-color:var(--accent); box-shadow:0 0 0 2px #000 inset }
-    main{ height:calc(100vh - 56px); }
+    .nav-btn:hover{ background: var(--btn-grad-hover); transform: translateY(-1px); filter:saturate(115%) }
+    .nav-btn:active{ transform: translateY(0) scale(.99) }
+    .nav-btn.is-active{ outline:none; box-shadow: var(--focus), var(--shadow); border-color:transparent }
+    .nav-btn:focus{ outline:none; box-shadow: var(--focus), var(--shadow) }
+
+    main{ height:calc(100vh - 60px); }
     .frame-wrap{ position:relative; width:100%; height:100%; }
-    iframe{
-      position:absolute; inset:0; width:100%; height:100%; border:0; background:#0c1016;
-    }
+    iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#0c1016; }
     [hidden]{ display:none !important; }
 
-    /* Vista de bienvenida cuando no hay iframe visible aún (opcional) */
-    .hero{ display:grid; place-items:center; height:100%; }
-    .hero .cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; padding:16px; width:min(860px, 96vw); }
+    /* ===== Hero con tarjetas estéticas ===== */
+    .hero{ display:grid; place-items:center; height:100%; padding:24px }
+    .hero-inner{ width:min(1100px, 94vw); display:grid; gap:22px }
+    .hero-title{
+      margin:6px 0 2px 0; text-align:center; font-size: clamp(24px, 4.5vw, 42px); font-weight:900; letter-spacing:1px;
+      background: linear-gradient(90deg, #9ae6ff 0%, #7aa2ff 30%, #00ffd0 60%, #9ae6ff 100%);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      text-shadow: 0 8px 52px rgba(0,0,0,.45);
+    }
+    .cards{
+      display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:18px;
+    }
     .card{
-      border:1px solid var(--line); background:linear-gradient(180deg, #11151e, #0b1018);
-      border-radius:14px; padding:20px; display:grid; gap:10px; box-shadow:0 10px 24px rgba(0,0,0,.25);
+      border:1px solid var(--line); background: var(--card-grad); border-radius:16px; padding:18px;
+      display:grid; gap:12px; box-shadow: var(--shadow); position:relative; overflow:hidden;
+    }
+    .card::after{
+      content:""; position:absolute; inset:-1px; border-radius:16px;
+      background: linear-gradient(120deg, rgba(122,162,255,.15), transparent 30%, rgba(0,255,208,.12) 60%, transparent 85%);
+      mask:linear-gradient(#000,transparent 60%); pointer-events:none;
+    }
+    .card-header{ display:flex; align-items:center; gap:12px }
+    .icon-badge{
+      width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+      background: linear-gradient(135deg, #142036, #203258);
+      border:1px solid #22324a; color:#bcd3ff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
     }
     .card h2{ margin:0; font-size:18px }
-    .card p{ margin:0; color:var(--muted); font-size:14px; line-height:1.4 }
-    .card .btn{ justify-self:start }
+    .card p{ margin:0; color:var(--muted); font-size:14px; line-height:1.45 }
+    .card .btn{
+      justify-self:start; background: var(--btn-grad); border:1px solid transparent;
+      padding:10px 14px; border-radius:12px; color:var(--text); display:inline-flex; gap:8px; align-items:center;
+      box-shadow: var(--shadow); cursor:pointer; text-decoration:none;
+    }
+    .card .btn:hover{ background: var(--btn-grad-hover) }
+    .card .btn:focus{ outline:none; box-shadow: var(--focus), var(--shadow) }
+
+    @media (max-width: 620px){
+      .app-header{ grid-template-columns:1fr auto; grid-template-areas:
+        "title nav"
+        "home nav"; gap:10px }
+      .brand-title{ grid-area:title; text-align:left }
+      .home-btn{ grid-area:home; justify-self:start }
+      .app-nav{ grid-area:nav; justify-self:end }
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important }
+    }
   </style>
 </head>
 <body>
   <header class="app-header">
-    <h1>Hoho3D · Herramientas</h1>
+    <!-- Botón Inicio -->
+    <a class="home-btn" href="https://hoho3d.com.ar/">
+      <span class="material-icons" aria-hidden="true">home</span>
+      Inicio
+    </a>
+
+    <!-- Título centrado -->
+    <h1 class="brand-title" aria-label="HOHO - HERRAMIENTAS">HOHO – HERRAMIENTAS</h1>
+
+    <!-- Tabs (cargan los iframes) -->
     <nav class="app-nav" role="tablist" aria-label="Herramientas Hoho3D">
       <button id="tab-color" data-target="#frame-color" class="nav-btn" role="tab" aria-selected="false" aria-controls="frame-color">
-        <span class="material-icons">palette</span> Color Finder
+        <span class="material-icons" aria-hidden="true">palette</span>
+        Color Finder
       </button>
       <button id="tab-calc" data-target="#frame-calc" class="nav-btn" role="tab" aria-selected="false" aria-controls="frame-calc">
-        <span class="material-icons">calculate</span> Calculadora de Costos
+        <span class="material-icons" aria-hidden="true">calculate</span>
+        Calculadora
       </button>
     </nav>
   </header>
 
   <main>
-    <!-- Vista de bienvenida (se oculta al abrir un iframe) -->
+    <!-- Vista de bienvenida (se oculta al abrir una herramienta) -->
     <div id="hero" class="hero" aria-hidden="false">
-      <div class="cards">
-        <div class="card">
-          <h2>Color Finder</h2>
-          <p>Busca filamentos por color, ideas y preview visual.</p>
-          <button class="nav-btn" data-target="#frame-color"><span class="material-icons">open_in_new</span> Abrir</button>
-        </div>
-        <div class="card">
-          <h2>Calculadora de Costos</h2>
-          <p>Calcula costos reales y exporta tu presupuesto en PDF.</p>
-          <button class="nav-btn" data-target="#frame-calc"><span class="material-icons">open_in_new</span> Abrir</button>
+      <div class="hero-inner">
+        <div class="hero-title">HOHO – HERRAMIENTAS</div>
+        <div class="cards">
+          <div class="card">
+            <div class="card-header">
+              <div class="icon-badge"><span class="material-icons" aria-hidden="true">palette</span></div>
+              <h2>Color Finder</h2>
+            </div>
+            <p>Explorá el catálogo por color, con sugerencias, ideas y visor de imágenes.</p>
+            <button class="btn nav-btn" data-target="#frame-color">
+              <span class="material-icons" aria-hidden="true">open_in_new</span> Abrir
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="icon-badge"><span class="material-icons" aria-hidden="true">calculate</span></div>
+              <h2>Calculadora de Costos</h2>
+            </div>
+            <p>Calculá costos reales (filamento, mano de obra, envío, IVA, ML) y exportá PDF.</p>
+            <button class="btn nav-btn" data-target="#frame-calc">
+              <span class="material-icons" aria-hidden="true">open_in_new</span> Abrir
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Contenedor de iframes (una herramienta visible a la vez) -->
     <div class="frame-wrap">
-      <!-- IMPORTANTE: cada iframe apunta a tu index original.
-           Si tus rutas son otras, cambia data-src. -->
+      <!-- Ajustá data-src si tus rutas son otras -->
       <iframe id="frame-color" title="Color Finder" hidden
               sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-top-navigation-by-user-activation"
               data-src="./color/index.html"></iframe>
@@ -91,7 +197,7 @@
   <script>
     const frames = {
       '#frame-color': document.getElementById('frame-color'),
-      '#frame-calc': document.getElementById('frame-calc'),
+      '#frame-calc' : document.getElementById('frame-calc'),
     };
     const hero = document.getElementById('hero');
     const btns = Array.from(document.querySelectorAll('.nav-btn'));
@@ -107,19 +213,18 @@
       const frame = frames[targetId];
       if (!frame) return;
 
-      // Lazy load: set src una sola vez
+      // Carga perezosa
       if (!frame.dataset.loaded) {
-        const src = frame.dataset.src;
-        frame.src = src;
+        frame.src = frame.dataset.src;
         frame.dataset.loaded = 'true';
       }
 
-      // Ocultar el hero y otros iframes
+      // Ocultar héroe y otros iframes
       hero.setAttribute('aria-hidden','true');
       hero.hidden = true;
       Object.values(frames).forEach(f => f.hidden = true);
 
-      // Mostrar el destino
+      // Mostrar destino
       frame.hidden = false;
       current = targetId;
 
@@ -127,12 +232,10 @@
       btns.forEach(b => setActive(b, b.dataset.target === targetId));
     }
 
-    // Click en cualquier .nav-btn abre el target
-    btns.forEach(b => {
-      b.addEventListener('click', () => show(b.dataset.target));
-    });
+    // Click en cualquier .nav-btn abre el target (incluye botones del hero)
+    btns.forEach(b => b.addEventListener('click', () => show(b.dataset.target)));
 
-    // Navegación con teclado entre pestañas del header
+    // Navegación con teclado entre las pestañas del header
     document.querySelector('.app-nav').addEventListener('keydown', (e)=>{
       const headerBtns = btns.filter(b => b.closest('.app-nav'));
       const idx = headerBtns.findIndex(b=>b.classList.contains('is-active'));
@@ -144,7 +247,7 @@
       }
     });
 
-    // Si querés abrir una por defecto, descomentá:
+    // Si querés abrir una por defecto al cargar, descomentá:
     // show('#frame-color');
   </script>
 </body>
