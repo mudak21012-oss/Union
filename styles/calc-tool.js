@@ -11,20 +11,16 @@ export function initCalcTool(container){
   const $ = (sel)=> root.querySelector(sel);
   const $$= (sel)=> Array.from(root.querySelectorAll(sel));
 
-  // --- Referencias clave (IDs originales dentro de #calc-app) ---
   // Tabs internas
   const tabs = $$('.tab');
   const tabContents = $$('.tab-content');
   const progressBar = $('#progressBar');
 
-  // Botones de navegación
   const nextButtons = $$('.next-tab');
   const prevButtons = $$('.prev-tab');
 
-  // Exportación
   const exportBtn = $('#exportPDFBtn');
 
-  // Utilidades
   function switchTab(key){
     tabs.forEach(t=>{
       const is = t.dataset.tab === key;
@@ -39,41 +35,27 @@ export function initCalcTool(container){
 
   function getCurrentTab(){
     const t = tabs.find(t=> t.classList.contains('active'));
-    return t?.dataset.tab || 'basic';
+    return t?.dataset.tab || (tabs[0]?.dataset.tab || 'basic');
   }
 
   function updateProgress(key){
-    const order = ['basic','printing','shipping','results'];
+    const order = tabs.map(t=>t.dataset.tab);
     const idx = Math.max(0, order.indexOf(key));
-    const pct = ((idx+1)/order.length)*100;
+    const pct = order.length ? ((idx+1)/order.length)*100 : 0;
     if (progressBar) progressBar.style.width = pct+'%';
   }
 
-  // Validación mínima por pestaña (reemplaza/expande con tu lógica original)
   function validateTab(key){
-    // Ejemplo: en "basic" que algunos campos requeridos no estén vacíos
-    if (key==='basic'){
-      const req = ['#tipoFilamento','#costoFilamento','#nombreImpresora','#costoImpresora']
-        .map(id=> $(id)).filter(Boolean);
-      let ok = true;
-      req.forEach(inp=>{
-        const good = !!inp.value;
-        inp.classList.toggle('error', !good);
-        if (!good) ok = false;
-      });
-      return ok;
-    }
+    // Hook para tu validación. Devuelve true para continuar.
     return true;
   }
 
-  // Debounce helper
   const debounce = (fn, ms=160)=> (...args)=>{ clearTimeout(debTimer); debTimer=setTimeout(()=>fn(...args), ms); };
 
-  // --- Cálculo (simplificado; pega tu lógica original aquí) ---
-  function parseNum(id, def=0){ const el=$(id); return el? Number(el.value||def) : def; }
+  function parseNum(sel, def=0){ const el=$(sel); return el? Number(el.value||def) : def; }
 
   function recalc(){
-    // Variables base de tus campos:
+    // Variables base (ajusta según tus IDs reales)
     const costoFilamentoKg = parseNum('#costoFilamento', 0);
     const gramos = parseNum('#gramosFilamento', 0);
     const horasImp = parseNum('#horasImpresion', 0);
@@ -81,22 +63,16 @@ export function initCalcTool(container){
     const gananciaHora = parseNum('#gananciaHora', 0);
     const ivaPct = parseNum('#iva', 21)/100;
     const ml = root.querySelector('#mercadoLibre')?.checked ? 0.10 : 0;
+    const envio = parseNum('#envioNacional', 0);
 
-    // Ejemplo de cálculo base (ajusta/pega aquí tu fórmula original):
     const filamento = (costoFilamentoKg/1000)*gramos;
     const manoObra = horasImp*sueldoHora;
     const ganancia  = horasImp*gananciaHora;
-
-    // Suma otros módulos opcionales según toggles (pega tu lógica)
-    const envio = parseNum('#envioNacional', 0);
-    // ...
-
     const subtotal = filamento + manoObra + ganancia + envio;
     const recargoML = subtotal * ml;
     const iva = (subtotal + recargoML) * ivaPct;
     const total = Math.round(subtotal + recargoML + iva);
 
-    // Actualiza UI
     const set = (sel, v)=>{ const el=$(sel); if (el) el.textContent = Number.isFinite(v) ? Intl.NumberFormat('es-AR').format(v) : '—'; };
     set('#filamentoCell', filamento);
     set('#manoObraCell', manoObra);
@@ -109,14 +85,11 @@ export function initCalcTool(container){
   }
 
   const recalcDebounced = debounce(recalc, 120);
-
-  // Enlaza inputs que afectan cálculo (puedes ampliar a todos tus campos)
   root.addEventListener('input', (e)=>{
     const t = e.target;
     if (t.matches('input, select')) recalcDebounced();
   });
 
-  // Navegación interna
   tabs.forEach(tab=>{
     tab.addEventListener('click', ()=> switchTab(tab.dataset.tab));
   });
@@ -132,7 +105,6 @@ export function initCalcTool(container){
     btn.addEventListener('click', ()=> switchTab(btn.dataset.prev));
   });
 
-  // Exportación PDF (carga bajo demanda)
   let pdfLoaded = false;
   async function ensurePdfLibs(){
     if (pdfLoaded) return;
@@ -151,7 +123,6 @@ export function initCalcTool(container){
   exportBtn?.addEventListener('click', async ()=>{
     try{
       await ensurePdfLibs();
-      // jsPDF UMD expone window.jspdf
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       const cliente = $('#nombreCliente')?.value || '';
@@ -161,7 +132,6 @@ export function initCalcTool(container){
       if (cliente) doc.text(`Cliente: ${cliente}`, 14, 26);
       doc.text(`Total recomendado: ${total}`, 14, 34);
 
-      // Tabla (autotable)
       const rows = [];
       [['Depreciación impresora', '#depImpresoraCell'],
        ['Depreciación PC', '#depPCCell'],
@@ -191,8 +161,8 @@ export function initCalcTool(container){
   });
 
   // Estado inicial
-  switchTab('basic');
-  recalc(); // primer cálculo para poblar placeholders
+  if (tabs[0]) switchTab(tabs[0].dataset.tab);
+  recalc();
   inited = true;
 }
 
