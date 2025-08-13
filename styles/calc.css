@@ -1,0 +1,131 @@
+/* =============================
+   Calculadora Hoho 3D (scoped)
+   Scope root: #calc-app
+   ============================= */
+#calc-app{
+  --primary-bg:#121212;
+  --secondary-bg:#1e1e1e;
+  --card-bg:#1e1e1e;
+  --section-bg:#252525;
+  --text-primary:#ffffff;
+  --text-secondary:#bbbbbb;
+  --accent-color:#1976D2;
+  --accent-2:#FF6F00;
+  --success:#4CAF50;
+  --warning:#FFCA28;
+  --danger:#ef4444;
+  --line:#333;
+  --shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+
+/* Reset limitado */
+#calc-app *{ box-sizing:border-box }
+#calc-app a{ color:var(--accent-color); text-decoration:none }
+#calc-app a:hover{ text-decoration:underline }
+#calc-app button{ font:inherit }
+
+/* Layout */
+#calc-app .container{ max-width:1200px; margin:0 auto; padding:20px }
+#calc-app header{ text-align:center; margin-bottom:20px; }
+#calc-app header h2{ margin:0 0 6px 0; font-size:20px }
+#calc-app header p{ margin:0; color:var(--text-secondary) }
+
+/* Tarjetas */
+#calc-app .card{
+  background:var(--card-bg);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+
+/* Tabs internas */
+#calc-app .tabs{ display:flex; gap:6px; background:var(--section-bg); border-radius:12px; padding:6px; border:1px solid var(--line); flex-wrap:wrap }
+#calc-app .tab{
+  padding:10px 14px; cursor:pointer; border-radius:10px; user-select:none;
+  color:var(--text-secondary); border:1px solid transparent;
+}
+#calc-app .tab:hover{ border-color:var(--line) }
+#calc-app .tab.active{ background:var(--accent-color); color:#fff; border-color:transparent }
+
+#calc-app .tab-content{ display:none; padding:18px 6px }
+#calc-app .tab-content.active{ display:block; animation: fadeIn .35s ease }
+@keyframes fadeIn{ from{ opacity:.001; transform: translateY(4px) } to{ opacity:1; transform:none } }
+
+/* Barra de progreso superior (opcional) */
+#calc-app .progress{ height:6px; background:#1a1a1a; border-radius:999px; overflow:hidden; border:1px solid var(--line); margin-bottom:12px }
+#calc-app #progressBar{ height:100%; width:25%; background:var(--accent-color) }
+
+/* Formularios */
+#calc-app .grid{ display:grid; gap:12px; grid-template-columns: repeat(12, 1fr) }
+#calc-app .col-12{ grid-column: span 12 }
+#calc-app .col-6{ grid-column: span 6 }
+#calc-app .col-4{ grid-column: span 4 }
+#calc-app .col-3{ grid-column: span 3 }
+#calc-app .col-2{ grid-column: span 2 }
+
+#calc-app label{ display:block; font-size:12px; color:var(--text-secondary); margin:0 0 6px 2px }
+#calc-app input[type="text"],
+#calc-app input[type="number"],
+#calc-app select{
+  width:100%;
+  background:#161616;
+  color:var(--text-primary);
+  border:1px solid var(--line);
+  padding:10px 12px;
+  border-radius:10px;
+}
+#calc-app input::placeholder{ color:#808080 }
+#calc-app .help{ font-size:12px; color:var(--text-secondary); margin-top:6px }
+
+/* Toggle (checkbox/radio estilizados) */
+#calc-app .toggle{ display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none }
+#calc-app .toggle input{ width:18px; height:18px }
+
+/* Botones */
+#calc-app .btn{ appearance:none; border:1px solid var(--line); background:#181818; color:#fff; padding:10px 14px; border-radius:10px; cursor:pointer }
+#calc-app .btn:hover{ border-color:#444 }
+#calc-app .btn-primary{ background:var(--accent-color); border-color:transparent }
+#calc-app .btn-outline{ background:transparent }
+#calc-app .btn-success{ background:var(--success); border-color:transparent }
+#calc-app .actions{ display:flex; gap:10px; flex-wrap:wrap }
+
+/* Tablas de resultados */
+#calc-app table{ width:100%; border-collapse:separate; border-spacing:0; border:1px solid var(--line); border-radius:12px; overflow:hidden }
+#calc-app thead th{ text-align:left; background:#181818; color:#ddd; padding:10px; font-weight:600; border-bottom:1px solid var(--line) }
+#calc-app tbody td{ padding:10px; border-bottom:1px solid #222; color:#e6e6e6 }
+#calc-app tbody tr:last-child td{ border-bottom:none }
+#calc-app tfoot td{ padding:12px 10px; background:#111; color:#fff; font-weight:700 }
+
+/* Celdas destacadas */
+#calc-app .cell-muted{ color:var(--text-secondary) }
+#calc-app .cell-ok{ color:#a7f3d0 }
+#calc-app .cell-warn{ color:var(--warning) }
+#calc-app .cell-danger{ color:var(--danger) }
+
+/* Estados de validación */
+#calc-app .error,
+#calc-app input.error,
+#calc-app select.error{ border-color:#d32f2f; box-shadow:0 0 0 2px rgba(211,47,47,.15) inset }
+#calc-app .invalid-feedback{ color:#ffb4ab; font-size:12px; margin-top:4px }
+
+/* Resumen total */
+#calc-app .total-card{ display:flex; align-items:center; justify-content:space-between; gap:16px }
+#calc-app .total-card .total{ font-size:22px; font-weight:700 }
+
+/* Responsive */
+@media (max-width: 960px){
+  #calc-app .grid{ grid-template-columns: repeat(6, 1fr) }
+  #calc-app .col-6{ grid-column: span 6 }
+  #calc-app .col-4{ grid-column: span 6 }
+  #calc-app .col-3{ grid-column: span 3 }
+  #calc-app .col-2{ grid-column: span 3 }
+}
+@media (max-width: 640px){
+  #calc-app .grid{ grid-template-columns: repeat(2, 1fr) }
+  #calc-app .col-6, #calc-app .col-4, #calc-app .col-3, #calc-app .col-2{ grid-column: span 2 }
+}
+@media (prefers-reduced-motion: reduce){
+  #calc-app *{ animation:none !important; transition:none !important }
+}
