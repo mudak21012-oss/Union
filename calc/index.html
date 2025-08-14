@@ -6,8 +6,9 @@
   <title>Calculadora de Costos Hoho 3D</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- CDNs actualizados para máxima compatibilidad -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <style>
     :root {
       --primary-bg: #121212;
@@ -1197,7 +1198,7 @@
         }
       });
 
-      // Export PDF
+      // Export PDF - Solución robusta
       document.getElementById('exportPDFBtn').addEventListener('click', exportToPDF);
 
       // Shipping cost calculation
@@ -1234,7 +1235,6 @@
       }
 
       function validateTab(currentTab) {
-        // Solo validamos los campos obligatorios en la pestaña básica
         const requiredFieldsByTab = {
           basic: ['tipoFilamento', 'costoFilamento', 'nombreImpresora', 'costoImpresora'],
           printing: [],
@@ -1347,7 +1347,6 @@
         hideAlert();
 
         try {
-          // Validar solo campos básicos necesarios
           const requiredBasicFields = ['tipoFilamento', 'costoFilamento', 'nombreImpresora', 'costoImpresora'];
           let missingFields = [];
           
@@ -1564,6 +1563,7 @@
         document.getElementById('calculationSuccess').style.display = 'none';
       }
 
+      // SOLUCIÓN ROBUSTA PARA GENERAR PDF
       function exportToPDF() {
         try {
           if (!totalFinal || totalFinal === '—') {
@@ -1571,79 +1571,126 @@
             return;
           }
 
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF();
-
-          doc.setFontSize(20);
-          doc.setFont("helvetica", "bold");
-          doc.text('Presupuesto de Impresión 3D', 105, 20, { align: 'center' });
-
-          const now = new Date();
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "normal");
-          doc.text(`Generado el: ${now.toLocaleDateString('es-AR')}`, 105, 28, { align: 'center' });
-
-          const nombreCliente = document.getElementById('nombreCliente').value;
-          let y = 40;
-          if (nombreCliente) {
-            doc.setFontSize(12);
-            doc.text(`Cliente: ${nombreCliente}`, 20, y);
-            y += 10;
+          // Verificar múltiples formas de acceso a la librería
+          if (typeof window.jspdf !== 'undefined') {
+            generatePDF(window.jspdf.jsPDF);
+          } else if (typeof jspdf !== 'undefined') {
+            generatePDF(jspdf.jsPDF);
+          } else {
+            // Cargar dinámicamente si no se detecta
+            loadPDFLibrary()
+              .then(jsPDF => generatePDF(jsPDF))
+              .catch(error => {
+                console.error('Error al cargar librería PDF:', error);
+                alert('No se pudo cargar la librería PDF. Intenta recargar la página.');
+              });
           }
-
-          const filamento = document.getElementById('tipoFilamento').value || 'No especificado';
-          const impresora = document.getElementById('nombreImpresora').value || 'No especificada';
-          doc.setFontSize(12);
-          doc.text(`Tipo de filamento: ${filamento}`, 20, y);
-          y += 10;
-          doc.text(`Impresora utilizada: ${impresora}`, 20, y);
-          y += 10;
-
-          doc.setFontSize(14);
-          doc.setFont("helvetica", "bold");
-          doc.text('Resumen del Presupuesto', 105, y, { align: 'center' });
-          y += 10;
-
-          const tableColumn = ["Concepto", "Monto (ARS)"];
-          const tableRows = [];
-          document.querySelectorAll('#summaryTable tbody tr').forEach(row => {
-            const cells = row.querySelectorAll('td');
-            if (cells.length === 2) {
-              tableRows.push([cells[0].textContent, cells[1].textContent]);
-            }
-          });
-
-          doc.autoTable({
-            head: [tableColumn],
-            body: tableRows,
-            startY: y,
-            theme: 'grid',
-            headStyles: {
-              fillColor: [25, 118, 210],
-              textColor: [255, 255, 255],
-              fontStyle: 'bold'
-            },
-            styles: {
-              fontSize: 10,
-              cellPadding: 3
-            },
-            columnStyles: {
-              1: { cellWidth: 40, halign: 'right' }
-            },
-            didDrawCell: data => {
-              if (data.row.index === tableRows.length - 1) {
-                doc.setFillColor(102, 187, 106);
-                doc.setTextColor(255, 255, 255);
-              }
-            }
-          });
-
-          doc.save('presupuesto_impresion3d.pdf');
-          alert('El presupuesto se ha exportado correctamente a PDF. La descarga iniciará en unos instantes.');
         } catch (error) {
           console.error('Error al exportar PDF:', error);
-          alert('Error al exportar el PDF. Por favor intenta de nuevo.');
+          alert('Error al exportar el PDF. Detalle: ' + error.message);
         }
+      }
+
+      // Función para cargar dinámicamente la librería PDF
+      function loadPDFLibrary() {
+        return new Promise((resolve, reject) => {
+          // Verificar si ya se cargó
+          if (typeof jspdf !== 'undefined') {
+            resolve(jspdf.jsPDF);
+            return;
+          }
+
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          script.onload = () => {
+            // Verificar múltiples formas de acceso
+            if (typeof window.jspdf !== 'undefined') {
+              resolve(window.jspdf.jsPDF);
+            } else if (typeof jspdf !== 'undefined') {
+              resolve(jspdf.jsPDF);
+            } else {
+              reject(new Error('Librería no disponible después de carga'));
+            }
+          };
+          script.onerror = () => reject(new Error('Error al cargar script'));
+          document.head.appendChild(script);
+        });
+      }
+
+      // Función para generar el PDF
+      function generatePDF(jsPDF) {
+        const doc = new jsPDF();
+
+        doc.setFontSize(20);
+        doc.setFont("helvetica", "bold");
+        doc.text('Presupuesto de Impresión 3D', 105, 20, { align: 'center' });
+
+        const now = new Date();
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Generado el: ${now.toLocaleDateString('es-AR')}`, 105, 28, { align: 'center' });
+
+        const nombreCliente = document.getElementById('nombreCliente').value;
+        let y = 40;
+        if (nombreCliente) {
+          doc.setFontSize(12);
+          doc.text(`Cliente: ${nombreCliente}`, 20, y);
+          y += 10;
+        }
+
+        const filamento = document.getElementById('tipoFilamento').value || 'No especificado';
+        const impresora = document.getElementById('nombreImpresora').value || 'No especificada';
+        doc.setFontSize(12);
+        doc.text(`Tipo de filamento: ${filamento}`, 20, y);
+        y += 10;
+        doc.text(`Impresora utilizada: ${impresora}`, 20, y);
+        y += 10;
+
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text('Resumen del Presupuesto', 105, y, { align: 'center' });
+        y += 10;
+
+        const tableColumn = ["Concepto", "Monto (ARS)"];
+        const tableRows = [];
+        document.querySelectorAll('#summaryTable tbody tr').forEach(row => {
+          const cells = row.querySelectorAll('td');
+          if (cells.length === 2) {
+            tableRows.push([cells[0].textContent, cells[1].textContent]);
+          }
+        });
+
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: y,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [25, 118, 210],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold'
+          },
+          styles: {
+            fontSize: 10,
+            cellPadding: 3
+          },
+          columnStyles: {
+            1: { cellWidth: 40, halign: 'right' }
+          },
+          didDrawCell: data => {
+            if (data.row.index === tableRows.length - 1) {
+              doc.setFillColor(102, 187, 106);
+              doc.setTextColor(255, 255, 255);
+            }
+          }
+        });
+
+        const nombreArchivo = nombreCliente 
+          ? `presupuesto_${nombreCliente.replace(/\s+/g, '_')}.pdf`
+          : 'presupuesto_impresion3d.pdf';
+        
+        doc.save(nombreArchivo);
+        alert('El PDF se ha generado correctamente. Para comenzar la descarga, por favor, haga clic en el botón de "Aceptar".');
       }
     });
   </script>
